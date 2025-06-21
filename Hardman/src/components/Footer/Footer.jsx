@@ -1,6 +1,8 @@
 import React from 'react';
 import { Container, Row, Col, Form, FormControl, Button } from 'react-bootstrap';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa'; // Para iconos de redes sociales
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
 
 function Footer() {
   const currentYear = new Date().getFullYear(); // Obtiene el año actual automáticamente

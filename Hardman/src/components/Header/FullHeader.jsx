@@ -5,7 +5,7 @@ function FullHeader() {
   return (
     <Navbar bg="dark" variant="dark" expand="lg"> {/* 'variant="dark"' para texto blanco sobre fondo oscuro */}
       <Container>
-        <Navbar.Brand href="#home">
+        <Navbar.Brand href="/">
           <img
             src="../../assets/hardman-logo.png" 
             width="30"
@@ -15,19 +15,15 @@ function FullHeader() {
           />
           Mi App
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" /> {/* Botón para el menú colapsable */}
-        <Navbar.Collapse id="basic-navbar-nav"> {/* Contenedor de los elementos colapsables */}
-          <Nav className="me-auto"> {/* 'me-auto' para empujar los elementos a la derecha */}
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav"> 
+          <Nav className="me-auto"> 
             <Nav.Link href="#home">Inicio</Nav.Link>
-            <Nav.Link href="#features">Características</Nav.Link>
+            <Nav.Link href="/productos">Productos</Nav.Link>
             <NavDropdown title="Servicios" id="basic-nav-dropdown">
-              <NavDropdown.Item href="#action/3.1">Servicio 1</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.2">Servicio 2</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.3">Algo más</NavDropdown.Item>
-              <NavDropdown.Divider /> {/* Separador */}
-              <NavDropdown.Item href="#action/3.4">Enlace Separado</NavDropdown.Item>
+              <NavDropdown.Item href="/building">Reparación</NavDropdown.Item>
+              <NavDropdown.Item href="/fixing">Armado</NavDropdown.Item>
             </NavDropdown>
-            <Nav.Link href="#contact" disabled>Contacto (próximamente)</Nav.Link> 
           </Nav>
           <Form className="d-flex"> 
             <FormControl

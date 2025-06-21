@@ -1,9 +1,5 @@
-// src/pages/Home.jsx
-
 import React from 'react';
-import Header from '../Header/FullHeader';
 import Carousel from '../Carousel/ControlledCarousel';
-import Footer from '../Footer/Footer';
 
 const Home = () => {
   // Datos para las imágenes del carrusel
@@ -14,8 +10,7 @@ const Home = () => {
 
   return (
     <>
-      <Header />
-      <main>
+    <main>
         <Carousel images={carouselImages} /> 
 
         <section>
@@ -24,7 +19,6 @@ const Home = () => {
         </section>
 
       </main>
-      <Footer />
     </>
   );
 };

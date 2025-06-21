@@ -18,7 +18,7 @@ function ControlledCarousel() {
             className="d-block w-100" 
             src={item.image}       
             alt={item.alt}          
-            style={{ maxHeight: '500px', objectFit: 'cover' }} 
+            style={{ maxHeight: '500px', objectFit: 'cover' , width: '900px'}} 
           />
 
           <Carousel.Caption>

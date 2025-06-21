@@ -37,8 +37,7 @@
 
 html, body {
   height: 100%;
-  margin: 0; /* Elimina el margen predeterminado */
-  padding: 0; /* Elimina el padding predeterminado */
+  width: 100%;
 }
 
 .App {
