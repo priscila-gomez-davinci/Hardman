@@ -11,6 +11,8 @@ import Footer from './components/Footer/Footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Profile from './components/Profile/Profile';
+import Manage from './components/Manage/Manage';
+import News from './components/News/News';
 
 const ProductsPage = () => {
   return (
@@ -41,7 +43,9 @@ function App() {
           <Route path="/building" element={<Building />} /> 
           <Route path="/fixing" element={<Fixing />} /> 
           <Route path="/productos" element={<ProductList />} />   
-          <Route path="/perfil" element={<Profile />} />        
+          <Route path="/perfil" element={<Profile />} /> 
+          <Route path="/administrar" element={<Manage />} /> 
+          <Route path="/noticias" element={<News/>}/>       
         </Routes>
         <Footer />
       </div>
