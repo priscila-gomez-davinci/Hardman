@@ -10,6 +10,7 @@ import Footer from './components/Footer/Footer';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import Profile from './components/Profile/Profile';
 
 const ProductsPage = () => {
   return (
@@ -39,7 +40,8 @@ function App() {
           <Route path="/contacto" element={<ContactForm />} /> 
           <Route path="/building" element={<Building />} /> 
           <Route path="/fixing" element={<Fixing />} /> 
-          <Route path="/productos" element={<ProductList />} />           
+          <Route path="/productos" element={<ProductList />} />   
+          <Route path="/perfil" element={<Profile />} />        
         </Routes>
         <Footer />
       </div>
