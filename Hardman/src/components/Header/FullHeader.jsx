@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../../assets/hardman-logo.png';
 import { Navbar, Container, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
 
 function FullHeader() {
@@ -7,13 +8,12 @@ function FullHeader() {
       <Container>
         <Navbar.Brand href="/">
           <img
-            src="../../assets/hardman-logo.png" 
+            src={logo} 
             width="30"
             height="30"
             className="d-inline-block align-top"
             alt="React Bootstrap logo"
           />
-          Mi App
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav"> 
