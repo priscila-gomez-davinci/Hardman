@@ -12,6 +12,7 @@
   "dependencies": {
     "boostrap": "^2.0.0",
     "bootstrap": "^5.3.6",
+    "faker": "^6.6.6",
     "react": "^19.1.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",
