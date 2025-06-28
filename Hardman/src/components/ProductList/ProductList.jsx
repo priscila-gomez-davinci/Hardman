@@ -1,26 +1,21 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Button, ListGroup, Alert } from 'react-bootstrap';
+import React from 'react';
+import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom'; 
 import ProductCardService from '../ProductCard/ProductCard';
+import Cart from '../Cart/Cart';
 import products from '../../data/products';
 
-const ProductList = () => {
-  const [selectedProducts, setSelectedProducts] = useState({});
+const ProductList = ({ cartItems, handleAddToCart, handleRemoveFromCart, handleIncreaseQuantity, handleDecreaseQuantity, setCartItems }) => {
+  const navigate = useNavigate(); // Hook para navegar
 
-  const handleSelect = (product) => {
-    setSelectedProducts((prevSelected) => ({
-      ...prevSelected,
-      [product.category]: product
-    }));
-  };
-
-  const filteredProducts = products.filter((product) => {
-    return !selectedProducts[product.category];
-  });
-
-  const total = Object.values(selectedProducts).reduce(
-    (sum, product) => sum + product.price,
+  const totalCartValue = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  const handleGoToCheckout = () => {
+    navigate('/checkout'); // Navega a la ruta /checkout
+  };
 
   return (
     <Container className="py-4">
@@ -29,50 +24,46 @@ const ProductList = () => {
       </section>
 
       <Row>
-        {filteredProducts.map((product) => (
-          <ProductCardService
-            key={product.id}
-            product={product}
-            onSelect={handleSelect}
-          />
-        ))}
-      </Row>
-
-      <hr />
-
-      <section className="mt-4">
-        <h3>Componentes seleccionados:</h3>
-        {Object.keys(selectedProducts).length === 0 ? (
-          <Alert variant="info">Aún no has seleccionado ningún componente.</Alert>
-        ) : (
-          <ListGroup className="mb-3">
-            {Object.entries(selectedProducts).map(([category, product]) => (
-              <ListGroup.Item key={category}>
-                <strong>{category}:</strong> {product.name} — ${product.price.toFixed(2)}
-              </ListGroup.Item>
+        <Col md={8}>
+          <h2>Productos Disponibles</h2>
+          <Row>
+            {products.map((product) => (
+              <ProductCardService
+                key={product.id}
+                product={product}
+                onAddToCart={handleAddToCart}
+              />
             ))}
-          </ListGroup>
-        )}
+          </Row>
+        </Col>
 
-        <h4>Total: ${total.toFixed(2)}</h4>
-
-        <div className="d-flex gap-3 mt-3">
-          <Button
-            variant="success"
-            disabled={Object.keys(selectedProducts).length === 0}
-            onClick={() => alert('¡Compra realizada!')}
-          >
-            Comprar
-          </Button>
-
-          <Button
-            variant="outline-danger"
-            onClick={() => setSelectedProducts({})}
-          >
-            Limpiar productos
-          </Button>
-        </div>
-      </section>
+        <Col md={4}>
+          <h2>Tu Carrito de Compras</h2>
+          <Cart
+            cartItems={cartItems}
+            onRemoveFromCart={handleRemoveFromCart}
+            onIncreaseQuantity={handleIncreaseQuantity}
+            onDecreaseQuantity={handleDecreaseQuantity}
+            totalCartValue={totalCartValue}
+          />
+          <div className="d-flex gap-3 mt-3">
+            <Button
+              variant="success"
+              disabled={cartItems.length === 0}
+              onClick={handleGoToCheckout} // Usa la nueva función para ir al checkout
+            >
+              Comprar Ahora
+            </Button>
+            <Button
+              variant="outline-danger"
+              onClick={() => setCartItems([])} // Llama al setter del carrito recibido por props
+              disabled={cartItems.length === 0}
+            >
+              Vaciar Carrito
+            </Button>
+          </div>
+        </Col>
+      </Row>
     </Container>
   );
 };

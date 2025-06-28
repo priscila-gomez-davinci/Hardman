@@ -1,34 +1,25 @@
 import React from 'react';
-import { Button } from 'react-bootstrap';
-import '../../assets/ProductCardService.css';
+import { Card, Button, Col } from 'react-bootstrap';
 
-const ProductCard = ({ product, onSelect, selectedProduct }) => {
-  const isSelected = selectedProduct?.category === product.category;
-  const isSameCategory = selectedProduct && selectedProduct.category === product.category;
-  const isDisabled = selectedProduct && isSameCategory && !isSelected;
-
+const ProductCard = ({ product, onAddToCart }) => { 
   return (
-    <div className={`col-md-4 mb-4`}>
-      <div className={`card h-100 ${isSelected ? 'border-primary shadow' : ''} ${isDisabled ? 'disabled-card' : ''}`}>
-        <img
-          src={product.image}
-          className="card-img-top"
-          alt={product.name}
-          style={{ height: '200px', objectFit: 'contain', padding: '10px' }}
-        />
-        <div className="card-body d-flex flex-column">
-          <h5 className="card-title">{product.name}</h5>
-          <p className="card-text">{product.description}</p>
-          <div className="mt-auto">
-            <p className="card-text"><strong>${product.price.toFixed(2)}</strong></p>
-            <p className="card-text text-muted small">Stock: {product.stock}</p>
-            <Button onClick={() => onSelect(product)} disabled={isDisabled}>
-              {isSelected ? 'Seleccionado' : 'Seleccionar'}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Col sm={6} md={6} lg={4} className="mb-4"> 
+      <Card className="h-100">
+        <Card.Img variant="top" src={product.image} alt={product.name} style={{ height: '180px', objectFit: 'cover' }} /> {/* Asegúrate de tener una propiedad 'image' en tus productos */}
+        <Card.Body className="d-flex flex-column">
+          <Card.Title>{product.name}</Card.Title>
+          <Card.Text>Categoría: {product.category}</Card.Text>
+          <Card.Text>Precio: ${product.price.toFixed(2)}</Card.Text>
+          <Button
+            variant="primary"
+            className="mt-auto" 
+            onClick={() => onAddToCart(product)} 
+          >
+            Agregar al Carrito
+          </Button>
+        </Card.Body>
+      </Card>
+    </Col>
   );
 };
 
