@@ -36,6 +36,13 @@
       "email": "afaffa@mail.com",
       "password": "asfafafaf",
       "role": "admin"
+    },
+    {
+      "id": "7",
+      "name": "LPM REACT",
+      "email": "tuvieja@puta.com",
+      "password": "1234",
+      "role": "admin"
     }
   ]
 }
