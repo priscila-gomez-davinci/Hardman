@@ -5,7 +5,7 @@ const ProductCard = ({ product, onAddToCart }) => {
   return (
     <Col sm={6} md={6} lg={4} className="mb-4"> 
       <Card className="h-100">
-        <Card.Img variant="top" src={product.image} alt={product.name} style={{ height: '180px', objectFit: 'cover' }} /> {/* Asegúrate de tener una propiedad 'image' en tus productos */}
+        <Card.Img variant="top" src={product.image} alt={product.name} style={{ height: '180px', objectFit: 'cover' }} /> 
         <Card.Body className="d-flex flex-column">
           <Card.Title>{product.name}</Card.Title>
           <Card.Text>Categoría: {product.category}</Card.Text>

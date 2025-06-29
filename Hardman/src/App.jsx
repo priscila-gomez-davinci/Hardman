@@ -11,6 +11,7 @@ import Profile from './components/Profile/Profile';
 import Manage from './components/Manage/Manage';
 import News from './components/News/News';
 import Checkout from './components/Checkout/Checkout';
+import UserManagementPage from './components/UsersABM/UserManagementPage';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -77,6 +78,7 @@ function App() {
           <Route path="/contacto" element={<ContactForm />} />
           <Route path="/building" element={<Building />} />
           <Route path="/fixing" element={<Fixing />} />
+          <Route path="/users" element={<UserManagementPage />} />
           <Route
             path="/productos"
             element={
