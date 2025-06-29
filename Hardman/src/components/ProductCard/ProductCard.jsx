@@ -1,26 +1,25 @@
 import React from 'react';
+import { Card, Button, Col } from 'react-bootstrap';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onAddToCart }) => { 
   return (
-    <div className="col-md-4 mb-4"> 
-      <div className="card h-100"> 
-        <img
-          src={product.image}
-          className="card-img-top"
-          alt={product.name}
-          style={{ height: '200px', objectFit: 'contain', padding: '10px' }} 
-        />
-        <div className="card-body d-flex flex-column"> 
-          <h5 className="card-title">{product.name}</h5>
-          <p className="card-text">{product.description}</p>
-          <div className="mt-auto"> {/* Push price and button to bottom */}
-            <p className="card-text"><strong>${product.price.toFixed(2)}</strong></p>
-            <p className="card-text text-muted small">Stock: {product.stock}</p>
-            <button className="btn btn-primary w-100 mt-2">Agregar al Carrito</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Col sm={6} md={6} lg={4} className="mb-4"> 
+      <Card className="h-100">
+        <Card.Img variant="top" src={product.image} alt={product.name} style={{ height: '180px', objectFit: 'cover' }} /> 
+        <Card.Body className="d-flex flex-column">
+          <Card.Title>{product.name}</Card.Title>
+          <Card.Text>Categoría: {product.category}</Card.Text>
+          <Card.Text>Precio: ${product.price.toFixed(2)}</Card.Text>
+          <Button
+            variant="primary"
+            className="mt-auto" 
+            onClick={() => onAddToCart(product)} 
+          >
+            Agregar al Carrito
+          </Button>
+        </Card.Body>
+      </Card>
+    </Col>
   );
 };
 

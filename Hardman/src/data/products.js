@@ -44,6 +44,16 @@ const products = [
       category: 'Placas Base',
       stock: 40,
     },
+        {
+      id: 'prod006',
+      name: 'Procesador Intel Core i7-14700K',
+      price: 429.99,
+      image: 'https://via.placeholder.com/150/0000FF/FFFFFF?text=Intel+i7', // Reemplaza con la URL real de tu imagen
+      description: 'Potente procesador para gaming y creación de contenido de alta gama.',
+      category: 'Procesadores',
+      stock: 50,
+    },
   ];
   
   export default products;
+
