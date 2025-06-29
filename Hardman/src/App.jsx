@@ -12,7 +12,10 @@ import Manage from './components/Manage/Manage';
 import News from './components/News/News';
 import Checkout from './components/Checkout/Checkout';
 import UserManagementPage from './components/UsersABM/UserManagementPage';
-
+import Login from './components/Auth/Login'; // Import the Login component
+import { AuthProvider } from './context/AuthContext';
+import PrivateRoute from './routes/PrivateRoute';
+import NotFound from './routes/NotFound.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -69,47 +72,66 @@ function App() {
   const totalItemsInCart = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <Router>
-      <div className="App">
-        <Header totalItemsInCart={totalItemsInCart} />
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Header totalItemsInCart={totalItemsInCart} />
 
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/contacto" element={<ContactForm />} />
-          <Route path="/building" element={<Building />} />
-          <Route path="/fixing" element={<Fixing />} />
-          <Route path="/users" element={<UserManagementPage />} />
-          <Route
-            path="/productos"
-            element={
-              <ProductList
-                cartItems={cartItems}
-                setCartItems={setCartItems}
-                handleAddToCart={handleAddToCart}
-                handleRemoveFromCart={handleRemoveFromCart}
-                handleIncreaseQuantity={handleIncreaseQuantity}
-                handleDecreaseQuantity={handleDecreaseQuantity}
-              />
-            }
-          />
-          <Route
-            path="/checkout"
-            element={
-              <Checkout
-                cartItems={cartItems}
-                totalCartValue={totalCartValue}
-                onClearCart={clearCart}
-              />
-            }
-          />
-          <Route path="/perfil" element={<Profile />} />
-          <Route path="/administrar" element={<Manage />} />
-          <Route path="/noticias" element={<News />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/contacto" element={<ContactForm />} />
+            <Route path="/building" element={<Building />} />
+            <Route path="/fixing" element={<Fixing />} />
+            <Route
+              path="/users"
+              element={
+                <PrivateRoute roles={['admin']}>
+                  <UserManagementPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/productos"
+              element={
+                <ProductList
+                  cartItems={cartItems}
+                  setCartItems={setCartItems}
+                  handleAddToCart={handleAddToCart}
+                  handleRemoveFromCart={handleRemoveFromCart}
+                  handleIncreaseQuantity={handleIncreaseQuantity}
+                  handleDecreaseQuantity={handleDecreaseQuantity}
+                />
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <Checkout
+                  cartItems={cartItems}
+                  totalCartValue={totalCartValue}
+                  onClearCart={clearCart}
+                />
+              }
+            />
+            <Route path="/perfil" element={<Profile />} />
+            <Route
+              path="/administrar"
+              element={
+                <PrivateRoute roles={['admin']}>
+                  <Manage />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/noticias" element={<News />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/notfound" element={<NotFound />} />
+            <Route path="*" element={<NotFound />} /> {/* Ruta comodín */}
+          </Routes>
 
-        <Footer />
-      </div>
-    </Router>
+          <Footer />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

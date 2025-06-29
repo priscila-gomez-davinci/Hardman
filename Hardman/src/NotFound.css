@@ -1,0 +1,23 @@
+.notfound-container {
+  min-height: 100vh;
+  background-color: var(--Primario); /* fondo negro */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--Blanco); /* texto blanco */
+  padding: 2rem;
+  text-align: center;
+}
+
+.notfound-title {
+  font-size: 8rem;
+  font-weight: bold;
+  color: var(--Secundario); /* verde o color secundario definido */
+  margin: 0;
+}
+
+.notfound-text {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
