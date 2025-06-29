@@ -4,30 +4,22 @@
     --GrisClaro:#B0B3BC;
     --GrisOscuro:#343539;
     --Blanco:#ffffff;
-
 }
 
-.formulario{
-    background: var(--Primario);
-    width: min(900px, 100%);
-    margin: 0 auto;
-    margin-top: 4rem; 
-    padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0px 10px 40px var(--Secundario);
-}
-
-.formulario fieldset {
-    border: none; 
-}
-.formulario legend {
+h2{
     text-align: center;
-    font-size: 1.8rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 2rem;
-    color:var(--Secundario);
 }
+
+
+.formulario {
+  background: var(--GrisOscuro);
+  padding: 2rem;
+  border-radius: 1rem;
+  width: min(900px, 100%);
+  margin: 2rem auto;
+  color: var(--Secundario);
+}
+
 @media (min-width: 768px) {
     .contenedor-campos {
         display: grid;
@@ -61,17 +53,16 @@
     height: 20rem;
 }
 
-.input-text{
-    width: 100%;
-    border: none;
-    padding: 1.5rem;
-    border-radius: .5rem;
-    background-color: var(--GrisOscuro);
-    color: var(--Blanco);
+.input-text,
+textarea,
+select {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: .5rem;
+  background-color: #2a2a2a;
+  color: var(--Blanco);
 }
-
-
-/*boton contacto*/
 
 .boton{
     background-color: var(--Secundario);

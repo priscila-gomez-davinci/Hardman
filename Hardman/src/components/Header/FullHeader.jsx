@@ -25,8 +25,10 @@ function FullHeader({ totalItemsInCart }) {
             <Nav.Link as={Link} to="/productos">Productos</Nav.Link>
 
             <NavDropdown title="Servicios" id="basic-nav-dropdown">
-              <NavDropdown.Item as={Link} to="/building">Reparación</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/fixing">Armado</NavDropdown.Item>
+
+              <NavDropdown.Item href="/building">Armado</NavDropdown.Item>
+              <NavDropdown.Item href="/fixing">Reparación</NavDropdown.Item>
+
             </NavDropdown>
 
             <Nav.Link as={Link} to="/contacto">Contacto</Nav.Link>
