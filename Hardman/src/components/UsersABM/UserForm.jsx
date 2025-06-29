@@ -3,17 +3,18 @@ import { Form, Button, Row, Col } from 'react-bootstrap';
 
 function UserForm({ user, onSave, onCancel }) {
   const [formData, setFormData] = useState({
-    id: '', // JSON Server auto-genera IDs en POST, pero lo necesitamos para PUT
+    id: '',
     name: '',
     email: '',
-    role: 'user', // Valor por defecto, es modificable
+    password: '', 
+    role: 'user',
   });
 
   useEffect(() => {
     if (user) {
       setFormData(user);
     } else {
-      setFormData({ id: '', name: '', email: '', role: 'user' });
+      setFormData({ id: '', name: '', email: '', password: '', role: 'user' }); 
     }
   }, [user]);
 
@@ -24,7 +25,7 @@ function UserForm({ user, onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData); // Llama a la función onSave pasada por props
+    onSave(formData);
   };
 
   return (
@@ -54,6 +55,18 @@ function UserForm({ user, onSave, onCancel }) {
           />
         </Form.Group>
       </Row>
+
+      <Form.Group className="mb-3" controlId="formPassword">
+        <Form.Label>Contraseña</Form.Label>
+        <Form.Control
+          type="password" 
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          placeholder="Introduce la contraseña"
+          required
+        />
+      </Form.Group>
 
       <Form.Group className="mb-3" controlId="formRole">
         <Form.Label>Rol</Form.Label>

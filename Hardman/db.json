@@ -25,10 +25,17 @@
       "role": "admin"
     },
     {
-      "id": "",
+      "id": "5",
       "name": "Priscila Ayelen",
       "email": "priscilaayeleng@gmail.com",
       "role": "user"
+    },
+    {
+      "id": "6",
+      "name": "Lallalaal",
+      "email": "afaffa@mail.com",
+      "password": "asfafafaf",
+      "role": "admin"
     }
   ]
 }

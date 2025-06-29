@@ -3,16 +3,15 @@ import { Container, Button, Alert, Spinner } from 'react-bootstrap';
 import UserList from './UserList';
 import UserForm from './UserForm';
 
-const API_URL = 'http://localhost:5001/users'; // En el de productos agregar /products
+const API_URL = 'http://localhost:5001/users'; // Replica esto pero con /products Lucas
 
 function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingUser, setEditingUser] = useState(null); // Estado del user
-  const [showForm, setShowForm] = useState(false); 
+  const [editingUser, setEditingUser] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
-  // Carga usuarios al levantar el componente
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -35,38 +34,41 @@ function UserManagementPage() {
     }
   };
 
-  // ABM user
-  const handleSaveUser = async (user) => {
+  const handleSaveUser = async (userToSave) => {
     setLoading(true);
     setError(null);
     try {
       let response;
-      if (user.id) {
-        // Update con PUT
-        response = await fetch(`${API_URL}/${user.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(user),
-        });
+      let method;
+      let url;
+      let bodyData = { ...userToSave };
+
+      if (userToSave.id) {
+        method = 'PUT';
+        url = `${API_URL}/${userToSave.id}`;
       } else {
-        // Add con POST
-        response = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(user),
-        });
+        method = 'POST';
+        url = API_URL;
+
+        // Esto resuelve el error de counting de los ids para que sean consecutivos
+        const maxId = users.reduce((max, user) => Math.max(max, Number(user.id)), 0);
+        bodyData.id = String(maxId + 1); 
       }
+
+      response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bodyData),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      await fetchUsers(); // Recarga despues de agregar un nuevo user para que se vea el nuevo usuario
-      setShowForm(false); // Ocultar formulario
-      setEditingUser(null); // Limpiar usuario en edición
+      await fetchUsers(); 
+      setShowForm(false); 
+      setEditingUser(null); 
     } catch (err) {
       setError('Error al guardar usuario: ' + err.message);
       console.error('Error saving user:', err);
@@ -75,7 +77,6 @@ function UserManagementPage() {
     }
   };
 
-  // Remove con DELETE
   const handleDeleteUser = async (id) => {
     if (!window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
       return;
@@ -89,7 +90,7 @@ function UserManagementPage() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      await fetchUsers(); // Recargar la lista después de eliminar
+      await fetchUsers();
     } catch (err) {
       setError('Error al eliminar usuario: ' + err.message);
       console.error('Error deleting user:', err);
@@ -98,10 +99,9 @@ function UserManagementPage() {
     }
   };
 
-
   const handleEditUser = (user) => {
     setEditingUser(user);
-    setShowForm(true); 
+    setShowForm(true);
   };
 
   const handleCancelForm = () => {
