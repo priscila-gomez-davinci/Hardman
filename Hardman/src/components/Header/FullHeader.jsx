@@ -21,8 +21,8 @@ function FullHeader() {
             <Nav.Link href="#home">Inicio</Nav.Link>
             <Nav.Link href="/productos">Productos</Nav.Link>
             <NavDropdown title="Servicios" id="basic-nav-dropdown">
-              <NavDropdown.Item href="/building">Reparación</NavDropdown.Item>
-              <NavDropdown.Item href="/fixing">Armado</NavDropdown.Item>
+              <NavDropdown.Item href="/building">Armado</NavDropdown.Item>
+              <NavDropdown.Item href="/fixing">Reparación</NavDropdown.Item>
             </NavDropdown>
           </Nav>
           <Form className="d-flex"> 
