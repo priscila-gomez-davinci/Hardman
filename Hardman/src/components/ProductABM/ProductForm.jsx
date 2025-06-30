@@ -1,28 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 
-function ProductForm({ products, onSave, onCancel }) {
+function ProductForm({ product, onSave, onCancel }) {
   const [formData, setFormData] = useState({
     id: '',
     name: '',
-    price: '',
+    price: 0,
     image: '', 
     description: '',
     category: '',
-    stock: '',
+    stock: 0,
   });
 
   useEffect(() => {
-    if (products) {
-      setFormData(products);
+    if (product) {
+      setFormData(product);
     } else {
-      setFormData({ id: '', name: '', price: '', image: '', description: '',category: '',stock: '' }); 
+      setFormData({
+        id: '',
+        name: '',
+        price: 0,
+        image: '',
+        description: '',
+        category: '',
+        stock: 0,
+      }); 
     }
-  }, [products]);
+  }, [product]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+        if (name === 'price') {
+      setFormData({
+        ...formData,
+        [name]: value === '' ? 0 : parseFloat(value), // Aseguramos que 'price' sea un número
+      });
+    } else if (name === 'stock') {
+      setFormData({
+        ...formData,
+        [name]: value === '' ? 0 : parseInt(value, 10), // Aseguramos que 'stock' sea un entero
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = (e) => {
@@ -40,48 +64,75 @@ function ProductForm({ products, onSave, onCancel }) {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Introduce el nombre"
+            placeholder="Introduce el nombre del producto"
             required
           />
         </Form.Group>
 
-        <Form.Group as={Col} controlId="formEmail">
+        <Form.Group as={Col} controlId="formPrice">
           <Form.Label>Precio</Form.Label>
           <Form.Control
-            type="price"
+            type="number"
             name="price"
             value={formData.price}
             onChange={handleChange}
-            placeholder="Introduce el email"
+            placeholder="Introduce el precio del producto"
             required
           />
         </Form.Group>
       </Row>
 
-      <Form.Group className="mb-3" controlId="formPassword">
-        <Form.Label>Foto de producto</Form.Label>
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formStock">
+          <Form.Label>Stock</Form.Label>
+          <Form.Control
+            type="number"
+            name="stock"
+            value={formData.stock}
+            onChange={handleChange}
+            placeholder="Cantidad en stock"
+            required
+          />
+        </Form.Group>
+
+        <Form.Group as={Col} controlId="formCategory">
+          <Form.Label>Categoría</Form.Label>
+          <Form.Control
+            type="text"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            placeholder="Introduce la categoría del producto"
+            required
+          />
+        </Form.Group>
+      </Row>
+
+      <Form.Group className="mb-3" controlId="formDescription">
+        <Form.Label>Descripción</Form.Label>
         <Form.Control
-          type="image" 
-          name="image"
-          value={formData.image}
+          as="textarea"
+          name="description"
+          value={formData.description}
           onChange={handleChange}
-          placeholder="Introduce la contraseña"
+          placeholder="Introduce la descripción del producto"
           required
         />
       </Form.Group>
 
-      <Form.Group className="mb-3" controlId="formRole">
-        <Form.Label>Rol</Form.Label>
-        <Form.Select name="role" value={formData.category} onChange={handleChange} required>
-          <option value="user">Usuario</option>
-          <option value="admin">Administrador</option>
-          <option value="editor">Editor</option>
-        </Form.Select>
+      <Form.Group className="mb-3" controlId="formImage">
+        <Form.Label>Ingresar URL de imagen del producto</Form.Label>
+        <Form.Control
+          type="text"
+          name="image"
+          onChange={handleChange}
+          required
+        />
       </Form.Group>
 
       <div className="d-flex justify-content-end gap-2">
         <Button variant="primary" type="submit">
-          {products ? 'Guardar Cambios' : 'Agregar Usuario'}
+          {product ? 'Guardar Cambios' : 'Agregar Producto'}
         </Button>
         <Button variant="secondary" onClick={onCancel}>
           Cancelar
