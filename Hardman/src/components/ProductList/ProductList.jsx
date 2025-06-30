@@ -1,12 +1,42 @@
-import React from 'react';
-import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Button, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'; 
 import ProductCardService from '../ProductCard/ProductCard';
 import Cart from '../Cart/Cart';
-import products from '../../data/products';
 
-const ProductList = ({ cartItems, handleAddToCart, handleRemoveFromCart, handleIncreaseQuantity, handleDecreaseQuantity, setCartItems }) => {
-  const navigate = useNavigate(); // Hook para navegar
+const API_URL = 'http://localhost:5001/products';
+
+const ProductList = ({
+  cartItems = [],
+  handleAddToCart,
+  handleRemoveFromCart,
+  handleIncreaseQuantity,
+  handleDecreaseQuantity,
+  setCartItems
+}) => {
+  const navigate = useNavigate();
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+        const data = await res.json();
+        setProducts(data);
+      } catch (err) {
+        setError('Error cargando productos: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const totalCartValue = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -14,8 +44,11 @@ const ProductList = ({ cartItems, handleAddToCart, handleRemoveFromCart, handleI
   );
 
   const handleGoToCheckout = () => {
-    navigate('/checkout'); // Navega a la ruta /checkout
+    navigate('/checkout');
   };
+
+  if (loading) return <Spinner animation="border" role="status" className="m-5"><span className="visually-hidden">Cargando...</span></Spinner>;
+  if (error) return <Alert variant="danger" className="m-5">{error}</Alert>;
 
   return (
     <Container className="py-4">
@@ -50,13 +83,13 @@ const ProductList = ({ cartItems, handleAddToCart, handleRemoveFromCart, handleI
             <Button
               variant="success"
               disabled={cartItems.length === 0}
-              onClick={handleGoToCheckout} // Usa la nueva función para ir al checkout
+              onClick={handleGoToCheckout}
             >
               Comprar Ahora
             </Button>
             <Button
               variant="outline-danger"
-              onClick={() => setCartItems([])} // Llama al setter del carrito recibido por props
+              onClick={() => setCartItems([])}
               disabled={cartItems.length === 0}
             >
               Vaciar Carrito
