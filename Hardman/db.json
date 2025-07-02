@@ -4,24 +4,28 @@
       "id": "1",
       "name": "Juan Pérez",
       "email": "juan.perez@example.com",
+      "password": "1234",
       "role": "admin"
     },
     {
       "id": "2",
       "name": "María García",
       "email": "maria.garcia@example.com",
+      "password": "1234",
       "role": "user"
     },
     {
       "id": "3",
       "name": "Pepe Pompin",
       "email": "conejofeo@example.com",
+      "password": "1234",
       "role": "user"
     },
     {
       "id": "4",
       "name": "Marito Baracus",
       "email": "ahreloco@example.com",
+      "password": "1234",
       "role": "admin"
     },
     {
