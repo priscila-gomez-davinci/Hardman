@@ -14,7 +14,7 @@ function Footer() {
           <Col md={4} className="mb-3"> 
             <h5>Hardman</h5>
             <p className="text-secondary"> 
-              Lucas Habilita el Shawarma
+              Trabajo para la materia Plataformas de desarrollo
               <br />
               Calle Falsa 123, Buenos Aires, Argentina.
             </p>

@@ -23,7 +23,7 @@ const Login = () => {
 
     if (user) {
       login(user); // Guarda en contexto y localStorage
-      navigate(user.role === 'admin' ? '/administrar' : '/productos');
+      navigate(user.role === 'admin' ? '/administrarProductos' : '/productos');
     } else {
       setError('Usuario o contraseña incorrectos');
     }

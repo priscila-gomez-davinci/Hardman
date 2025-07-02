@@ -6,7 +6,6 @@ const ProfileCard = ({ user, setUser, onDelete, actionLabel = "Modificar Perfil"
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     name: user.name,
-    surname: user.surname,
     email: user.email,
   });
 
@@ -27,10 +26,10 @@ const ProfileCard = ({ user, setUser, onDelete, actionLabel = "Modificar Perfil"
             <Image src={usuarioJPG} roundedCircle fluid style={{ maxWidth: '150px' }} />
           </Col>
           <Col xs={12} md={8}>
-            <h4 className="mb-2">{user.name} {user.surname}</h4>
+            <h4 className="mb-2">{user.name}</h4>
             <p className="mb-1"><strong>Email:</strong> {user.email}</p>
             <Badge bg="info" text="dark" className="px-3 py-2 mb-3">
-              Rol: {user.rol}
+              Rol: {user.role}
             </Badge>
             <Stack direction="horizontal" gap={2} className="flex-wrap">
               {actionLabel === "Gestionar" ? (
@@ -64,15 +63,6 @@ const ProfileCard = ({ user, setUser, onDelete, actionLabel = "Modificar Perfil"
                 type="text"
                 name="name"
                 value={formData.name}
-                onChange={handleChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Apellido</Form.Label>
-              <Form.Control
-                type="text"
-                name="surname"
-                value={formData.surname}
                 onChange={handleChange}
               />
             </Form.Group>

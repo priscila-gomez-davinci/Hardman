@@ -4,30 +4,35 @@
       "id": "1",
       "name": "Juan Pérez",
       "email": "juan.perez@example.com",
+      "password": "1234",
       "role": "admin"
     },
     {
       "id": "2",
       "name": "María García",
       "email": "maria.garcia@example.com",
+      "password": "1234",
       "role": "user"
     },
     {
       "id": "3",
       "name": "Pepe Pompin",
       "email": "conejofeo@example.com",
+      "password": "1234",
       "role": "user"
     },
     {
       "id": "4",
       "name": "Marito Baracus",
       "email": "ahreloco@example.com",
+      "password": "1234",
       "role": "admin"
     },
     {
       "id": "5",
       "name": "Priscila Ayelen",
       "email": "priscilaayeleng@gmail.com",
+      "password": "1234",
       "role": "user"
     },
     {
@@ -43,6 +48,62 @@
       "email": "tuvieja@puta.com",
       "password": "1234",
       "role": "admin"
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "Procesador Intel Core i7-14700K",
+      "price": 436.99,
+      "image": "https://www.venex.com.ar/products_images/1713803956_intel2.jpg",
+      "description": "Potente procesador para gaming y creación de contenido de alta gama.",
+      "category": "Procesadores",
+      "stock": 40
+    },
+    {
+      "id": "2",
+      "name": "Tarjeta Gráfica NVIDIA GeForce RTX 4070",
+      "price": 599.99,
+      "image": "https://http2.mlstatic.com/D_NQ_NP_792332-MLU74266353447_012024-O.webp",
+      "description": "Rendimiento excepcional para los últimos juegos con trazado de rayos.",
+      "category": "Tarjetas Gráficas",
+      "stock": 30
+    },
+    {
+      "id": "3",
+      "name": "Memoria RAM Corsair Vengeance 16GB (2x8GB) DDR4 3200MHz",
+      "price": 75.5,
+      "image": "https://http2.mlstatic.com/D_NQ_NP_972939-MLA74780022455_022024-O.webp",
+      "description": "Alta velocidad y fiabilidad para mejorar el rendimiento de tu sistema.",
+      "category": "Memorias RAM",
+      "stock": 100
+    },
+    {
+      "id": "4",
+      "name": "Disco SSD Samsung 970 EVO Plus 1TB NVMe",
+      "price": 99,
+      "image": "https://www.compu-santafe.com.ar/productos/get-imagen/38896",
+      "description": "Almacenamiento ultrarrápido para tiempos de carga mínimos.",
+      "category": "Almacenamiento",
+      "stock": 75
+    },
+    {
+      "id": "5",
+      "name": "Placa Base ASUS ROG Strix B760-A Gaming WiFi",
+      "price": 189.99,
+      "image": "https://dlcdnwebimgs.asus.com/files/media/35738687-93B3-4728-A64D-F9923E5FD2DB/v1/img/spec/performance.png",
+      "description": "Placa base de alto rendimiento con WiFi integrado para gaming.",
+      "category": "Placas Base",
+      "stock": 40
+    },
+    {
+      "id": "7",
+      "name": "Auriculares Inalámbricos Jbl Tune 760bt Bluetooth Negro",
+      "price": 5000,
+      "image": "https://http2.mlstatic.com/D_NQ_NP_869735-MLA86345465368_062025-O.webp",
+      "description": "lll",
+      "category": "auriculares",
+      "stock": 1
     }
   ]
 }
