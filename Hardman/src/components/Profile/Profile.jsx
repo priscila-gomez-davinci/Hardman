@@ -1,14 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProfileCard from '../ProfileCard/ProfileCard';
-import users from '../../data/users';
+import { useAuth } from '../../context/AuthContext';
 
 const Profile = () => {
+  const { user: authUser } = useAuth();
+
   const [user, setUser] = useState({
-    name: users[0].nombre,
-    surname: users[0].apellido,
-    email: users[0].email,
-    rol: users[0].id_rol,
+    name: '',
+    email: '',
+    role: ''
   });
+
+  useEffect(() => {
+    if (authUser) {
+      setUser({
+        name: authUser.name || '',
+        email: authUser.email || '',
+        role: authUser.role || ''
+      });
+    }
+  }, [authUser]);
+
+  if (!authUser) {
+    return <p>No hay usuario autenticado</p>;
+  }
 
   return (
     <div className="container">
@@ -16,12 +31,7 @@ const Profile = () => {
       
       <ProfileCard user={user} setUser={setUser} />
 
-      {/* <h3 className="mt-5">Mis productos recientes</h3>
-      <div className="row mt-4">
-        {products.slice(0, 3).map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))} 
-      </div> */}
+      {/* Resto del componente */}
     </div>
   );
 };

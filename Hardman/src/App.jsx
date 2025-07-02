@@ -8,7 +8,6 @@ import ProductList from './components/ProductList/ProductList';
 import Header from './components/Header/FullHeader'; 
 import Footer from './components/Footer/Footer';
 import Profile from './components/Profile/Profile';
-import Manage from './components/Manage/Manage';
 import News from './components/News/News';
 import Checkout from './components/Checkout/Checkout';
 import UserManagementPage from './components/UsersABM/UserManagementPage';
@@ -123,14 +122,6 @@ function App() {
               }
             />
             <Route path="/perfil" element={<Profile />} />
-            <Route
-              path="/administrar"
-              element={
-                <PrivateRoute roles={['admin']}>
-                  <Manage />
-                </PrivateRoute>
-              }
-            />
             <Route path="/noticias" element={<News />} />
             <Route path="/login" element={<Login />} />
             <Route path="/notfound" element={<NotFound />} />

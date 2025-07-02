@@ -46,7 +46,6 @@ function FullHeader({ totalItemsInCart }) {
             {/* Dropdown solo para admin */}
             {user && user.role === 'admin' && (
               <NavDropdown title="Administrador" id="admin-nav-dropdown">
-                <NavDropdown.Item as={Link} to="/administrar">Administrar</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/users">Gestión de usuarios</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/administrarProductos">Gestión de productos</NavDropdown.Item>
               </NavDropdown>
