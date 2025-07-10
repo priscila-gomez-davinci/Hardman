@@ -38,8 +38,8 @@ async function getConnection() {
 
 // --- Rutas de la API ---
 
-// Ruta para obtener todos los usuarios (ya existente)
-app.get('/api/users', async (req, res) => {
+// Ruta para obtener todos los productos 
+app.get('/api/products', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
@@ -52,7 +52,7 @@ app.get('/api/users', async (req, res) => {
                 u.password,
                 r.name AS role
             FROM
-                users AS u
+                products AS p
             JOIN
                 roles AS r ON u.role_id = r.id
         `);
@@ -73,7 +73,7 @@ app.get('/api/users', async (req, res) => {
 // --- Métodos ABM para usuarios ---
 
 // 1. Crear un nuevo usuario (Alta)
-app.post('/api/users', async (req, res) => {
+app.post('/api/products', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
@@ -108,7 +108,7 @@ app.post('/api/users', async (req, res) => {
 });
 
 // 2. Actualizar un usuario existente (Modificación)
-app.put('/api/users/:id', async (req, res) => {
+app.put('/api/products/:id', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
@@ -147,7 +147,7 @@ app.put('/api/users/:id', async (req, res) => {
 });
 
 // 3. Eliminar un usuario (Baja)
-app.delete('/api/users/:id', async (req, res) => {
+app.delete('/api/products/:id', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
@@ -167,72 +167,6 @@ app.delete('/api/users/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
         res.status(500).json({ message: 'Error interno del servidor al eliminar usuario', error: error.message });
-    } finally {
-        if (connection) {
-            await connection.end();
-        }
-    }
-});
-
-
-/// Consulta de Usuario y Contraseña para Login
-
-// Ruta para la autenticación de login
-app.post('/api/login', async (req, res) => {
-    let connection;
-    try {
-        connection = await getConnection();
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email y contraseña son requeridos.' });
-        }
-
-        // Busca el usuario por email
-        const [rows] = await connection.execute(
-            'SELECT id, name, email, password, role_id FROM users WHERE email = ?',
-            [email]
-        );
-
-        const user = rows[0];
-
-        // Verifica si el usuario existe
-        if (!user) {
-            return res.status(401).json({ message: 'Credenciales inválidas.' });
-        }
-
-        // Aquí deberías **comparar la contraseña proporcionada con la contraseña hasheada** almacenada.
-        // Si usaste bcrypt para hashear:
-        // const passwordMatch = await bcrypt.compare(password, user.password);
-        // if (!passwordMatch) {
-        //     return res.status(401).json({ message: 'Credenciales inválidas.' });
-        // }
-
-        // POR AHORA, para fines de ejemplo, simplemente comparamos la contraseña directamente (NO RECOMENDADO PARA PRODUCCIÓN)
-        if (password !== user.password) {
-            return res.status(401).json({ message: 'Credenciales inválidas.' });
-        }
-
-        // Si las credenciales son válidas, puedes generar un token JWT aquí
-        // Por ejemplo, usando 'jsonwebtoken'
-        // const jwt = require('jsonwebtoken');
-        // const token = jwt.sign({ userId: user.id, roleId: user.role_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        // Devuelve información del usuario (sin la contraseña) y opcionalmente el token
-        res.json({
-            message: 'Login exitoso',
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role_id: user.role_id
-            },
-            // token: token // Si implementas JWT
-        });
-
-    } catch (error) {
-        console.error('Error en el login:', error);
-        res.status(500).json({ message: 'Error interno del servidor en el login', error: error.message });
     } finally {
         if (connection) {
             await connection.end();
