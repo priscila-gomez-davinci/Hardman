@@ -1,185 +1,184 @@
-// Cargar variables de entorno al principio
-require('dotenv').config();
 
-const express = require('express');
-const mysql = require('mysql2/promise'); // Usamos la versión con promesas para async/await
-const cors = require('cors'); // Para habilitar CORS
-
-const app = express();
-const port = process.env.PORT || 3000; // Puedes configurar el puerto en .env o usar 3000 por defecto
-
-// Middleware para habilitar CORS
-// Esto es importante si tu frontend está en un dominio diferente (ej. React en localhost:5173 y backend en localhost:3000)
-app.use(cors());
-
-// Middleware para parsear JSON en el cuerpo de las peticiones
-app.use(express.json());
-
-// --- Configuración de la Conexión a la Base de Datos ---
-const dbConfig = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT
-};
-
-// Función para obtener una conexión a la DB
-async function getConnection() {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        console.log('Conectado a la base de datos MySQL');
-        return connection;
-    } catch (error) {
-        console.error('Error al conectar a la base de datos:', error);
-        throw error;
-    }
-}
-
-// --- Rutas de la API ---
-
-// Ruta para obtener todos los productos 
-app.get('/api/products', async (req, res) => {
+app.get('/api/productos', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
-
         const [rows] = await connection.execute(`
             SELECT
-                u.id,
-                u.name,
-                u.email,
-                u.password,
-                r.name AS role
+                p.id_producto,
+                p.nombre_producto,
+                p.descripcion,
+                p.precio_minorista,
+                p.precio_mayorista,
+                p.stock,
+                p.imagen_url,
+                p.sku,
+                p.activo,
+                p.id_categoria,
+                c.nombre_categoria
             FROM
-                products AS p
+                producto AS p
             JOIN
-                roles AS r ON u.role_id = r.id
+                categoria AS c ON p.id_categoria = c.id_categoria
         `);
-
-        // Formateamos la respuesta
-        res.json({ users: rows });
-
+        res.json({ productos: rows });
     } catch (error) {
-        console.error('Error al obtener usuarios:', error);
+        console.error('Error al obtener productos:', error);
         res.status(500).json({ message: 'Error interno del servidor', error: error.message });
     } finally {
-        if (connection) {
-            await connection.end(); // Cerrar la conexión para liberar recursos
-        }
+        if (connection) await connection.end();
     }
 });
 
-// --- Métodos ABM para usuarios ---
-
-// 1. Crear un nuevo usuario (Alta)
-app.post('/api/products', async (req, res) => {
-    let connection;
-    try {
-        connection = await getConnection();
-        const { name, email, password, role_id } = req.body; // Asume que role_id viene en el body
-
-        if (!name || !email || !password || !role_id) {
-            return res.status(400).json({ message: 'Todos los campos (name, email, password, role_id) son requeridos.' });
-        }
-
-        // Aquí podrías agregar un hash a la contraseña antes de guardarla (ej. con bcrypt)
-        // const hashedPassword = await bcrypt.hash(password, 10); // Necesitarías instalar bcrypt
-
-        const [result] = await connection.execute(
-            'INSERT INTO users (name, email, password, role_id) VALUES (?, ?, ?, ?)',
-            [name, email, password, role_id]
-        );
-
-        res.status(201).json({ message: 'Usuario creado exitosamente', userId: result.insertId });
-
-    } catch (error) {
-        console.error('Error al crear usuario:', error);
-        // Manejo específico para error de email duplicado
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ message: 'El email ya está registrado.', error: error.message });
-        }
-        res.status(500).json({ message: 'Error interno del servidor al crear usuario', error: error.message });
-    } finally {
-        if (connection) {
-            await connection.end();
-        }
-    }
-});
-
-// 2. Actualizar un usuario existente (Modificación)
-app.put('/api/products/:id', async (req, res) => {
+app.get('/api/productos/:id', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
         const { id } = req.params;
-        const { name, email, password, role_id } = req.body;
-
-        if (!name || !email || !password || !role_id) {
-            return res.status(400).json({ message: 'Todos los campos (name, email, password, role_id) son requeridos para la actualización.' });
+        const [rows] = await connection.execute(`
+            SELECT
+                p.id_producto,
+                p.nombre_producto,
+                p.descripcion,
+                p.precio_minorista,
+                p.precio_mayorista,
+                p.stock,
+                p.imagen_url,
+                p.sku,
+                p.activo,
+                p.id_categoria,
+                c.nombre_categoria
+            FROM
+                producto AS p
+            JOIN
+                categoria AS c ON p.id_categoria = c.id_categoria
+            WHERE
+                p.id_producto = ?
+        `, [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Producto no encontrado.' });
         }
-
-        // Aquí podrías agregar un hash a la contraseña si también se actualiza
-        // const hashedPassword = await bcrypt.hash(password, 10);
-
-        const [result] = await connection.execute(
-            'UPDATE users SET name = ?, email = ?, password = ?, role_id = ? WHERE id = ?',
-            [name, email, password, role_id, id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
-        }
-
-        res.json({ message: 'Usuario actualizado exitosamente' });
-
+        res.json({ producto: rows[0] });
     } catch (error) {
-        console.error('Error al actualizar usuario:', error);
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ message: 'El email ya está registrado.', error: error.message });
-        }
-        res.status(500).json({ message: 'Error interno del servidor al actualizar usuario', error: error.message });
+        console.error('Error al obtener producto por ID:', error);
+        res.status(500).json({ message: 'Error interno del servidor', error: error.message });
     } finally {
-        if (connection) {
-            await connection.end();
-        }
+        if (connection) await connection.end();
     }
 });
 
-// 3. Eliminar un usuario (Baja)
-app.delete('/api/products/:id', async (req, res) => {
+app.post('/api/productos', async (req, res) => {
+    let connection;
+    try {
+        connection = await getConnection();
+        const { nombre_producto, descripcion, precio_minorista, precio_mayorista, stock, imagen_url, sku, activo, id_categoria } = req.body;
+
+        if (!nombre_producto || !precio_minorista || !precio_mayorista || stock === undefined || !sku || !id_categoria) {
+            return res.status(400).json({ message: 'Faltan campos obligatorios para crear un producto (nombre_producto, precio_minorista, precio_mayorista, stock, sku, id_categoria).' });
+        }
+
+        const [categoriaRows] = await connection.execute('SELECT id_categoria FROM categoria WHERE id_categoria = ?', [id_categoria]);
+        if (categoriaRows.length === 0) {
+            return res.status(400).json({ message: 'La categoría especificada no existe.' });
+        }
+
+        const [result] = await connection.execute(
+            `INSERT INTO producto (nombre_producto, descripcion, precio_minorista, precio_mayorista, stock, imagen_url, sku, activo, id_categoria)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                nombre_producto,
+                descripcion || null,
+                precio_minorista,
+                precio_mayorista,
+                stock,
+                imagen_url || null,
+                sku,
+                activo !== undefined ? activo : 1, 
+                id_categoria
+            ]
+        );
+        res.status(201).json({ message: 'Producto creado exitosamente', id_producto: result.insertId });
+    } catch (error) {
+        console.error('Error al crear producto:', error);
+        if (error.code === 'ER_DUP_ENTRY' && error.message.includes('sku')) {
+            return res.status(409).json({ message: 'Ya existe un producto con el SKU proporcionado.', error: error.message });
+        }
+        res.status(500).json({ message: 'Error interno del servidor al crear producto', error: error.message });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.put('/api/productos/:id', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
         const { id } = req.params;
+        const { nombre_producto, descripcion, precio_minorista, precio_mayorista, stock, imagen_url, sku, activo, id_categoria } = req.body;
+
+        if (!nombre_producto || !precio_minorista || !precio_mayorista || stock === undefined || !sku || !id_categoria) {
+            return res.status(400).json({ message: 'Todos los campos obligatorios son requeridos para la actualización.' });
+        }
+
+        const [categoriaRows] = await connection.execute('SELECT id_categoria FROM categoria WHERE id_categoria = ?', [id_categoria]);
+        if (categoriaRows.length === 0) {
+            return res.status(400).json({ message: 'La categoría especificada no existe.' });
+        }
 
         const [result] = await connection.execute(
-            'DELETE FROM users WHERE id = ?',
-            [id]
+            `UPDATE producto SET
+                nombre_producto = ?,
+                descripcion = ?,
+                precio_minorista = ?,
+                precio_mayorista = ?,
+                stock = ?,
+                imagen_url = ?,
+                sku = ?,
+                activo = ?,
+                id_categoria = ?
+             WHERE id_producto = ?`,
+            [
+                nombre_producto,
+                descripcion || null,
+                precio_minorista,
+                precio_mayorista,
+                stock,
+                imagen_url || null,
+                sku,
+                activo !== undefined ? activo : 1,
+                id_categoria,
+                id
+            ]
         );
-
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
+            return res.status(404).json({ message: 'Producto no encontrado.' });
         }
-
-        res.json({ message: 'Usuario eliminado exitosamente' });
-
+        res.json({ message: 'Producto actualizado exitosamente' });
     } catch (error) {
-        console.error('Error al eliminar usuario:', error);
-        res.status(500).json({ message: 'Error interno del servidor al eliminar usuario', error: error.message });
-    } finally {
-        if (connection) {
-            await connection.end();
+        console.error('Error al actualizar producto:', error);
+        if (error.code === 'ER_DUP_ENTRY' && error.message.includes('sku')) {
+            return res.status(409).json({ message: 'El SKU ya está en uso por otro producto.', error: error.message });
         }
+        res.status(500).json({ message: 'Error interno del servidor al actualizar producto', error: error.message });
+    } finally {
+        if (connection) await connection.end();
     }
 });
 
-// --- Iniciar el Servidor ---
-app.listen(port, () => {
-    console.log(`Servidor Express corriendo en http://localhost:${port}`);
-    console.log(`Puedes probar la API de usuarios en http://localhost:${port}/api/users`);
-    console.log(`Para crear un usuario: POST http://localhost:${port}/api/users`);
-    console.log(`Para actualizar un usuario: PUT http://localhost:${port}/api/users/:id`);
-    console.log(`Para eliminar un usuario: DELETE http://localhost:${port}/api/users/:id`);
-    console.log(`Para login: POST http://localhost:${port}/api/login`);
+app.delete('/api/productos/:id', async (req, res) => {
+    let connection;
+    try {
+        connection = await getConnection();
+        const { id } = req.params;
+        const [result] = await connection.execute('DELETE FROM producto WHERE id_producto = ?', [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Producto no encontrado.' });
+        }
+        res.json({ message: 'Producto eliminado exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar producto:', error);
+        res.status(500).json({ message: 'Error interno del servidor al eliminar producto', error: error.message });
+    } finally {
+        if (connection) await connection.end();
+    }
 });

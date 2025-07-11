@@ -1,143 +1,225 @@
-// Cargar variables de entorno al principio
-require('dotenv').config();
 
-const express = require('express');
-const mysql = require('mysql2/promise');
-const cors = require('cors');
-const nodemailer = require('nodemailer'); // Importar Nodemailer
-
-const app = express();
-const port = process.env.PORT || 3000;
-
-// Middleware para habilitar CORS
-app.use(cors());
-// Middleware para parsear JSON en el cuerpo de las peticiones
-app.use(express.json());
-
-// --- Configuración de la Conexión a la Base de Datos ---
-const dbConfig = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT
-};
-
-// Función para obtener una conexión a la DB
-async function getConnection() {
-    try {
-        const connection = await mysql.createConnection(dbConfig);
-        console.log('Conectado a la base de datos MySQL');
-        return connection;
-    } catch (error) {
-        console.error('Error al conectar a la base de datos:', error);
-        throw error;
-    }
-}
-
-// --- Configuración del transportador de Nodemailer ---
-// Este objeto es el que Nodemailer usa para enviar emails.
-// Aquí se configura para usar Gmail. Adapta esto según tu proveedor de email.
-const transporter = nodemailer.createTransport({
-    service: 'gmail', // Puedes cambiarlo por 'hotmail', 'outlook', o un host SMTP personalizado
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
-
-// --- Rutas de la API (Manteniendo las existentes y añadiendo la nueva) ---
-
-// (Tus rutas existentes para /api/users, /api/login, etc. irían aquí)
-// Por ejemplo, tu ruta GET /api/users:
-app.get('/api/users', async (req, res) => {
+app.get('/api/pedidos-reparacion', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
         const [rows] = await connection.execute(`
             SELECT
-                u.id,
-                u.name,
-                u.email,
-                u.password,
-                r.name AS role
+                pr.id_pedido_reparacion,
+                pr.nombre_cliente,
+                pr.email_cliente,
+                pr.telefono_cliente,
+                pr.descripcion,
+                pr.fecha_solicitud,
+                pr.estado_reparacion,
+                pr.id_usuario_cliente,
+                uc.name AS nombre_usuario_cliente,
+                pr.id_usuario_tecnico,
+                ut.name AS nombre_usuario_tecnico,
+                pr.id_categoria_reparacion,
+                cr.nombre_categoria AS nombre_categoria_reparacion
             FROM
-                users AS u
+                pedido_reparacion AS pr
+            LEFT JOIN
+                users AS uc ON pr.id_usuario_cliente = uc.id
+            LEFT JOIN
+                users AS ut ON pr.id_usuario_tecnico = ut.id
             JOIN
-                roles AS r ON u.role_id = r.id
+                categoria_reparacion AS cr ON pr.id_categoria_reparacion = cr.id_categoria_reparacion
         `);
-        res.json({ users: rows });
+        res.json({ pedidosReparacion: rows });
     } catch (error) {
-        console.error('Error al obtener usuarios:', error);
+        console.error('Error al obtener pedidos de reparación:', error);
         res.status(500).json({ message: 'Error interno del servidor', error: error.message });
     } finally {
-        if (connection) {
-            await connection.end();
-        }
+        if (connection) await connection.end();
     }
 });
 
-// --- Nueva Ruta para el Formulario de Contacto ---
-app.post('/api/contact', async (req, res) => {
+app.get('/api/pedidos-reparacion/:id', async (req, res) => {
     let connection;
     try {
         connection = await getConnection();
-        const { name, email, subject, message } = req.body;
-
-        // 1. Validar datos del formulario
-        if (!name || !email || !message) {
-            return res.status(400).json({ message: 'Nombre, email y mensaje son campos requeridos.' });
+        const { id } = req.params;
+        const [rows] = await connection.execute(`
+            SELECT
+                pr.id_pedido_reparacion,
+                pr.nombre_cliente,
+                pr.email_cliente,
+                pr.telefono_cliente,
+                pr.descripcion,
+                pr.fecha_solicitud,
+                pr.estado_reparacion,
+                pr.id_usuario_cliente,
+                uc.name AS nombre_usuario_cliente,
+                pr.id_usuario_tecnico,
+                ut.name AS nombre_usuario_tecnico,
+                pr.id_categoria_reparacion,
+                cr.nombre_categoria AS nombre_categoria_reparacion
+            FROM
+                pedido_reparacion AS pr
+            LEFT JOIN
+                users AS uc ON pr.id_usuario_cliente = uc.id
+            LEFT JOIN
+                users AS ut ON pr.id_usuario_tecnico = ut.id
+            JOIN
+                categoria_reparacion AS cr ON pr.id_categoria_reparacion = cr.id_categoria_reparacion
+            WHERE
+                pr.id_pedido_reparacion = ?
+        `, [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Pedido de reparación no encontrado.' });
         }
-
-        // 2. Guardar datos en la base de datos (tabla `contacts`)
-        const [result] = await connection.execute(
-            'INSERT INTO contacts (name, email, subject, message) VALUES (?, ?, ?, ?)',
-            [name, email, subject || null, message] // subject puede ser opcional
-        );
-
-        // 3. Enviar email de confirmación al usuario
-        const mailOptions = {
-            from: process.env.EMAIL_USER, // Tu email
-            to: email, // El email del usuario que envió el formulario
-            subject: '¡Gracias por contactarnos! - Confirmación de Recepción',
-            html: `
-                <p>Hola ${name},</p>
-                <p>Hemos recibido tu mensaje y queremos agradecerte por contactarnos. Nuestro equipo se pondrá en contacto contigo a la brevedad posible.</p>
-                <p>Aquí está un resumen de tu mensaje:</p>
-                <ul>
-                    <li><strong>Asunto:</strong> ${subject || 'Sin asunto'}</li>
-                    <li><strong>Mensaje:</strong> <br>${message.replace(/\n/g, '<br>')}</li>
-                </ul>
-                <p>¡Esperamos hablar contigo pronto!</p>
-                <p>Atentamente,</p>
-                <p>El equipo de Hardman</p>
-            `
-        };
-
-        await transporter.sendMail(mailOptions);
-        console.log(`Email de confirmación enviado a ${email}`);
-
-        res.status(200).json({
-            message: 'Formulario de contacto recibido y email de confirmación enviado exitosamente.',
-            contactId: result.insertId
-        });
-
+        res.json({ pedidoReparacion: rows[0] });
     } catch (error) {
-        console.error('Error al procesar el formulario de contacto:', error);
-        res.status(500).json({
-            message: 'Error interno del servidor al procesar el formulario de contacto.',
-            error: error.message
-        });
+        console.error('Error al obtener pedido de reparación por ID:', error);
+        res.status(500).json({ message: 'Error interno del servidor', error: error.message });
     } finally {
-        if (connection) {
-            await connection.end();
-        }
+        if (connection) await connection.end();
     }
 });
 
-// --- Iniciar el Servidor ---
-app.listen(port, () => {
-    console.log(`Servidor Express corriendo en http://localhost:${port}`);
-    console.log(`Para probar el formulario de contacto: POST http://localhost:${port}/api/contact`);
-    // ... (otras rutas para tus ABM, si quieres mostrarlas en consola)
+app.post('/api/pedidos-reparacion', async (req, res) => {
+    let connection;
+    try {
+        connection = await getConnection();
+        const {
+            nombre_cliente,
+            email_cliente,
+            telefono_cliente,
+            descripcion,
+            estado_reparacion, 
+            id_usuario_cliente, 
+            id_usuario_tecnico, 
+            id_categoria_reparacion
+        } = req.body;
+
+        if (!nombre_cliente || !email_cliente || !telefono_cliente || !descripcion || !id_categoria_reparacion) {
+            return res.status(400).json({ message: 'Faltan campos obligatorios para crear un pedido de reparación.' });
+        }
+
+        const [categoriaRepRows] = await connection.execute('SELECT id_categoria_reparacion FROM categoria_reparacion WHERE id_categoria_reparacion = ?', [id_categoria_reparacion]);
+        if (categoriaRepRows.length === 0) {
+            return res.status(400).json({ message: 'La categoría de reparación especificada no existe.' });
+        }
+
+        if (id_usuario_cliente) {
+            const [userClientRows] = await connection.execute('SELECT id FROM users WHERE id = ?', [id_usuario_cliente]);
+            if (userClientRows.length === 0) {
+                return res.status(400).json({ message: 'El usuario cliente especificado no existe.' });
+            }
+        }
+
+        const [result] = await connection.execute(
+            `INSERT INTO pedido_reparacion (nombre_cliente, email_cliente, telefono_cliente, descripcion, fecha_solicitud, estado_reparacion, id_usuario_cliente, id_usuario_tecnico, id_categoria_reparacion)
+             VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?)`,
+            [
+                nombre_cliente,
+                email_cliente,
+                telefono_cliente,
+                descripcion,
+                estado_reparacion || 'pendiente', 
+                id_usuario_cliente || null,
+                id_usuario_tecnico || null,
+                id_categoria_reparacion
+            ]
+        );
+        res.status(201).json({ message: 'Pedido de reparación creado exitosamente', id_pedido_reparacion: result.insertId });
+    } catch (error) {
+        console.error('Error al crear pedido de reparación:', error);
+        res.status(500).json({ message: 'Error interno del servidor al crear pedido de reparación', error: error.message });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.put('/api/pedidos-reparacion/:id', async (req, res) => {
+    let connection;
+    try {
+        connection = await getConnection();
+        const { id } = req.params;
+        const {
+            nombre_cliente,
+            email_cliente,
+            telefono_cliente,
+            descripcion,
+            estado_reparacion,
+            id_usuario_cliente,
+            id_usuario_tecnico,
+            id_categoria_reparacion
+        } = req.body;
+
+        if (!nombre_cliente || !email_cliente || !telefono_cliente || !descripcion || !estado_reparacion || !id_categoria_reparacion) {
+            return res.status(400).json({ message: 'Faltan campos obligatorios para actualizar un pedido de reparación.' });
+        }
+
+        const [categoriaRepRows] = await connection.execute('SELECT id_categoria_reparacion FROM categoria_reparacion WHERE id_categoria_reparacion = ?', [id_categoria_reparacion]);
+        if (categoriaRepRows.length === 0) {
+            return res.status(400).json({ message: 'La categoría de reparación especificada no existe.' });
+        }
+        if (id_usuario_cliente) {
+            const [userClientRows] = await connection.execute('SELECT id FROM users WHERE id = ?', [id_usuario_cliente]);
+            if (userClientRows.length === 0) {
+                return res.status(400).json({ message: 'El usuario cliente especificado no existe.' });
+            }
+        }
+        if (id_usuario_tecnico) {
+            const [userTechRows] = await connection.execute('SELECT id FROM users WHERE id = ?', [id_usuario_tecnico]);
+            if (userTechRows.length === 0) {
+                return res.status(400).json({ message: 'El usuario técnico especificado no existe.' });
+            }
+        }
+
+
+        const [result] = await connection.execute(
+            `UPDATE pedido_reparacion SET
+                nombre_cliente = ?,
+                email_cliente = ?,
+                telefono_cliente = ?,
+                descripcion = ?,
+                estado_reparacion = ?,
+                id_usuario_cliente = ?,
+                id_usuario_tecnico = ?,
+                id_categoria_reparacion = ?
+             WHERE id_pedido_reparacion = ?`,
+            [
+                nombre_cliente,
+                email_cliente,
+                telefono_cliente,
+                descripcion,
+                estado_reparacion,
+                id_usuario_cliente || null,
+                id_usuario_tecnico || null,
+                id_categoria_reparacion,
+                id
+            ]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Pedido de reparación no encontrado.' });
+        }
+        res.json({ message: 'Pedido de reparación actualizado exitosamente' });
+    } catch (error) {
+        console.error('Error al actualizar pedido de reparación:', error);
+        res.status(500).json({ message: 'Error interno del servidor al actualizar pedido de reparación', error: error.message });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.delete('/api/pedidos-reparacion/:id', async (req, res) => {
+    let connection;
+    try {
+        connection = await getConnection();
+        const { id } = req.params;
+        const [result] = await connection.execute('DELETE FROM pedido_reparacion WHERE id_pedido_reparacion = ?', [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Pedido de reparación no encontrado.' });
+        }
+        res.json({ message: 'Pedido de reparación eliminado exitosamente' });
+    } catch (error) {
+        console.error('Error al eliminar pedido de reparación:', error);
+        res.status(500).json({ message: 'Error interno del servidor al eliminar pedido de reparación', error: error.message });
+    } finally {
+        if (connection) await connection.end();
+    }
 });

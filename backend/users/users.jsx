@@ -32,28 +32,25 @@ async function getConnection() {
         return connection;
     } catch (error) {
         console.error('Error al conectar a la base de datos:', error);
-        throw error;
+        throw error; 
     }
 }
 
-// --- Rutas de la API ---
-
-// Ruta para obtener todos los usuarios (ya existente)
 app.get('/api/users', async (req, res) => {
-    let connection;
+    let connection; 
     try {
         connection = await getConnection();
-
+        
         const [rows] = await connection.execute(`
-            SELECT
-                u.id,
-                u.name,
-                u.email,
-                u.password,
-                r.name AS role
-            FROM
+            SELECT 
+                u.id, 
+                u.name, 
+                u.email, 
+                u.password, 
+                r.name AS role 
+            FROM 
                 users AS u
-            JOIN
+            JOIN 
                 roles AS r ON u.role_id = r.id
         `);
 
@@ -70,182 +67,8 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-// --- Métodos ABM para usuarios ---
-
-// 1. Crear un nuevo usuario (Alta)
-app.post('/api/users', async (req, res) => {
-    let connection;
-    try {
-        connection = await getConnection();
-        const { name, email, password, role_id } = req.body; // Asume que role_id viene en el body
-
-        if (!name || !email || !password || !role_id) {
-            return res.status(400).json({ message: 'Todos los campos (name, email, password, role_id) son requeridos.' });
-        }
-
-        // Aquí podrías agregar un hash a la contraseña antes de guardarla (ej. con bcrypt)
-        // const hashedPassword = await bcrypt.hash(password, 10); // Necesitarías instalar bcrypt
-
-        const [result] = await connection.execute(
-            'INSERT INTO users (name, email, password, role_id) VALUES (?, ?, ?, ?)',
-            [name, email, password, role_id]
-        );
-
-        res.status(201).json({ message: 'Usuario creado exitosamente', userId: result.insertId });
-
-    } catch (error) {
-        console.error('Error al crear usuario:', error);
-        // Manejo específico para error de email duplicado
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ message: 'El email ya está registrado.', error: error.message });
-        }
-        res.status(500).json({ message: 'Error interno del servidor al crear usuario', error: error.message });
-    } finally {
-        if (connection) {
-            await connection.end();
-        }
-    }
-});
-
-// 2. Actualizar un usuario existente (Modificación)
-app.put('/api/users/:id', async (req, res) => {
-    let connection;
-    try {
-        connection = await getConnection();
-        const { id } = req.params;
-        const { name, email, password, role_id } = req.body;
-
-        if (!name || !email || !password || !role_id) {
-            return res.status(400).json({ message: 'Todos los campos (name, email, password, role_id) son requeridos para la actualización.' });
-        }
-
-        // Aquí podrías agregar un hash a la contraseña si también se actualiza
-        // const hashedPassword = await bcrypt.hash(password, 10);
-
-        const [result] = await connection.execute(
-            'UPDATE users SET name = ?, email = ?, password = ?, role_id = ? WHERE id = ?',
-            [name, email, password, role_id, id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
-        }
-
-        res.json({ message: 'Usuario actualizado exitosamente' });
-
-    } catch (error) {
-        console.error('Error al actualizar usuario:', error);
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ message: 'El email ya está registrado.', error: error.message });
-        }
-        res.status(500).json({ message: 'Error interno del servidor al actualizar usuario', error: error.message });
-    } finally {
-        if (connection) {
-            await connection.end();
-        }
-    }
-});
-
-// 3. Eliminar un usuario (Baja)
-app.delete('/api/users/:id', async (req, res) => {
-    let connection;
-    try {
-        connection = await getConnection();
-        const { id } = req.params;
-
-        const [result] = await connection.execute(
-            'DELETE FROM users WHERE id = ?',
-            [id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
-        }
-
-        res.json({ message: 'Usuario eliminado exitosamente' });
-
-    } catch (error) {
-        console.error('Error al eliminar usuario:', error);
-        res.status(500).json({ message: 'Error interno del servidor al eliminar usuario', error: error.message });
-    } finally {
-        if (connection) {
-            await connection.end();
-        }
-    }
-});
-
-
-/// Consulta de Usuario y Contraseña para Login
-
-// Ruta para la autenticación de login
-app.post('/api/login', async (req, res) => {
-    let connection;
-    try {
-        connection = await getConnection();
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email y contraseña son requeridos.' });
-        }
-
-        // Busca el usuario por email
-        const [rows] = await connection.execute(
-            'SELECT id, name, email, password, role_id FROM users WHERE email = ?',
-            [email]
-        );
-
-        const user = rows[0];
-
-        // Verifica si el usuario existe
-        if (!user) {
-            return res.status(401).json({ message: 'Credenciales inválidas.' });
-        }
-
-        // Aquí deberías **comparar la contraseña proporcionada con la contraseña hasheada** almacenada.
-        // Si usaste bcrypt para hashear:
-        // const passwordMatch = await bcrypt.compare(password, user.password);
-        // if (!passwordMatch) {
-        //     return res.status(401).json({ message: 'Credenciales inválidas.' });
-        // }
-
-        // POR AHORA, para fines de ejemplo, simplemente comparamos la contraseña directamente (NO RECOMENDADO PARA PRODUCCIÓN)
-        if (password !== user.password) {
-            return res.status(401).json({ message: 'Credenciales inválidas.' });
-        }
-
-        // Si las credenciales son válidas, puedes generar un token JWT aquí
-        // Por ejemplo, usando 'jsonwebtoken'
-        // const jwt = require('jsonwebtoken');
-        // const token = jwt.sign({ userId: user.id, roleId: user.role_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        // Devuelve información del usuario (sin la contraseña) y opcionalmente el token
-        res.json({
-            message: 'Login exitoso',
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role_id: user.role_id
-            },
-            // token: token // Si implementas JWT
-        });
-
-    } catch (error) {
-        console.error('Error en el login:', error);
-        res.status(500).json({ message: 'Error interno del servidor en el login', error: error.message });
-    } finally {
-        if (connection) {
-            await connection.end();
-        }
-    }
-});
-
 // --- Iniciar el Servidor ---
 app.listen(port, () => {
     console.log(`Servidor Express corriendo en http://localhost:${port}`);
     console.log(`Puedes probar la API de usuarios en http://localhost:${port}/api/users`);
-    console.log(`Para crear un usuario: POST http://localhost:${port}/api/users`);
-    console.log(`Para actualizar un usuario: PUT http://localhost:${port}/api/users/:id`);
-    console.log(`Para eliminar un usuario: DELETE http://localhost:${port}/api/users/:id`);
-    console.log(`Para login: POST http://localhost:${port}/api/login`);
 });
