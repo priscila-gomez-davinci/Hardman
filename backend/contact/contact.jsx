@@ -175,6 +175,10 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
+app.get('/', (req, res) => {
+    res.send('API de HARDMAN funcionando!');
+});
+
 app.listen(port, () => {
     console.log(`Servidor Express corriendo en http://localhost:${port}`);
     console.log(`Para probar el formulario de contacto: POST http://localhost:${port}/api/contact`);
