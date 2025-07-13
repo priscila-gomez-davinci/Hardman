@@ -1,19 +1,16 @@
-// config/db.js
-const mysql = require('mysql2/promise');
+import mysql from 'mysql2/promise';
+import 'dotenv/config';
 
-const pool = mysql.createPool({
+
+const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+    port: process.env.DB_PORT
+};
 
-// El pool se conecta y prueba la conexión automáticamente.
-// Si falla, lanzará un error cuando lo uses la primera vez.
-console.log('✔ Pool de conexiones a la base de datos configurado.');
+const pool = mysql.createPool(dbConfig);
 
-module.exports = pool;
+// Exportamos el pool para que toda la app lo use
+export default pool;

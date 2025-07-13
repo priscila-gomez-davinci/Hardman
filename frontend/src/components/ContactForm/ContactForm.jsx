@@ -51,55 +51,46 @@ function ContactForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitMessage(null); // Limpiar mensajes anteriores
-    setIsLoading(true); // Indicar que la petición está en curso
+    setSubmitMessage(null);
+    setIsLoading(true); 
 
     if (!validateForm()) {
       console.log('Errores en el formulario:', errors);
-      setIsLoading(false); // Detener carga si hay errores de validación
+      setIsLoading(false); 
       return;
     }
 
-    // Mapear los nombres de los campos del frontend a los nombres esperados por el backend (DER)
-    const dataToSend = {
-      nombre_cliente: formData.nombre,
-      email_cliente: formData.correo,
-      telefono: formData.telefono,
-      descripcion: formData.mensaje,
-      // Si tuvieras un campo de asunto en el frontend, lo pasarías aquí:
-      // subject: formData.asunto,
-      // Si el usuario estuviera logueado, podrías pasar su ID aquí (ej. id_usuario_rel: userId)
-      // id_usuario_rel: localStorage.getItem('userId') || null,
-    };
+const dataToSend = {
+  name: formData.nombre,
+  email: formData.correo,
+  phone: formData.telefono,
+  message: formData.mensaje,
+};
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Si tu API requiriera un token de autenticación (JWT), lo agregarías aquí:
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(dataToSend),
       });
 
       const data = await response.json();
 
-      if (response.ok) { // Si la respuesta es exitosa (status 2xx)
+      if (response.ok) { 
         setSubmitMessage({ type: 'success', text: data.message || '¡Mensaje enviado exitosamente! Te hemos enviado un email de confirmación.' });
-        // Resetear formulario solo en caso de éxito
         setFormData({ nombre: '', telefono: '', correo: '', mensaje: '' });
         setErrors({});
-      } else { // Si la respuesta indica un error (status 4xx, 5xx)
+      } else { 
         setSubmitMessage({ type: 'error', text: data.message || 'Hubo un error al enviar tu mensaje. Inténtalo de nuevo más tarde.' });
         console.error('Error al enviar el formulario:', data.error || data.message);
       }
     } catch (error) {
-      // Este catch maneja errores de red o errores antes de recibir una respuesta del servidor
       setSubmitMessage({ type: 'error', text: 'No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet o intenta más tarde.' });
       console.error('Error de conexión o inesperado:', error);
     } finally {
-      setIsLoading(false); // Siempre detener el estado de carga al finalizar
+      setIsLoading(false); 
     }
   };
 
@@ -108,11 +99,10 @@ function ContactForm() {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    // Limpiar el error específico del campo al que se le está escribiendo
     if (errors[e.target.name]) {
       setErrors(prevErrors => ({
         ...prevErrors,
-        [e.target.name]: undefined // Eliminar el mensaje de error para este campo
+        [e.target.name]: undefined 
       }));
     }
   };
@@ -130,7 +120,7 @@ function ContactForm() {
                 type="text"
                 id="nombre"
                 name="nombre"
-                placeholder="Lucas queremos shawarma"
+                placeholder="Nombre"
                 value={formData.nombre}
                 onChange={handleChange}
               />
@@ -165,22 +155,6 @@ function ContactForm() {
               {errors.correo && <p className="error">{errors.correo}</p>}
             </div>
 
-            {/* Si decides añadir un campo de Asunto en el frontend: */}
-            {/*
-            <div className="campo">
-              <label htmlFor="asunto">Asunto</label>
-              <input
-                className="input-text"
-                type="text"
-                id="asunto"
-                name="asunto"
-                placeholder="Asunto de tu mensaje"
-                value={formData.asunto}
-                onChange={handleChange}
-              />
-            </div>
-            */}
-
             <div className="campo">
               <label htmlFor="mensaje">Mensaje</label>
               <textarea
@@ -199,12 +173,11 @@ function ContactForm() {
               className="boton"
               type="submit"
               value={isLoading ? 'Enviando...' : 'Enviar'}
-              disabled={isLoading} // Deshabilitar el botón mientras se envía
+              disabled={isLoading}
             />
           </div>
         </fieldset>
 
-        {/* Mensajes de feedback al usuario */}
         {submitMessage && (
           <p className={submitMessage.type === 'success' ? 'success-message' : 'error-message'}>
             {submitMessage.text}
