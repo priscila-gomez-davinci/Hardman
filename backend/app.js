@@ -1,10 +1,14 @@
-// backend/app.js
-
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import pool from './src/config/db.js'; // Importamos el pool
-import contactRoutes from './src/routes/contactRoutes.js'; // Asegúrate de que este archivo también use 'export'
+import pool from './src/config/db.js'; 
+import contactRoutes from './src/routes/contactRoutes.js';
+import productRoutes from './src/routes/productRoutes.js'; 
+import categoryRoutes from './src/routes/categoryRoutes.js'; 
+import repairOrderRoutes from './src/routes/repairOrderRoutes.js'; 
+import orderRoutes from './src/routes/orderRoutes.js'; 
+
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -16,7 +20,11 @@ app.use(express.json());
 
 // --- Rutas de la API ---
 app.use('/api/contact', contactRoutes);
-// ... aquí irían tus otras rutas
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes); 
+app.use('/api/repair-orders', repairOrderRoutes); 
+app.use('/api/orders', orderRoutes); 
+
 
 
 // --- Manejadores de Errores (siempre al final) ---
@@ -30,7 +38,6 @@ res.status(500).json({ message: 'Error interno del servidor.' });
 });
 
 
-// --- Función para Iniciar el Servidor ---
 const startServer = async () => {
      try {
  // 1. Primero, probamos la conexión al pool de la base de datos.
@@ -39,15 +46,15 @@ const startServer = async () => {
 
  // 2. Si la conexión es exitosa, ponemos el servidor a escuchar.
  app.listen(port, () => {
- console.log(`✔ Servidor Express escuchando en http://localhost:${port}`);
+ console.log(`Servidor Express escuchando en http://localhost:${port}`);
  });
 
  } catch (error) {
-console.error('✖ Fallo fatal al conectar con la base de datos. El servidor no se iniciará.');
+console.error('Fallo fatal al conectar con la base de datos. El servidor no se iniciará.');
  console.error(error.message);
- process.exit(1); // Sale de la aplicación si no se puede conectar a la DB
+ process.exit(1); 
  }
 };
 
-// --- Ejecutamos la función para iniciar todo ---
+
 startServer();

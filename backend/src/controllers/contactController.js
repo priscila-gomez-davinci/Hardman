@@ -1,6 +1,4 @@
-// src/controllers/contactController.js
-
-import pool from '../config/db.js'; // Importa el pool de conexiones
+import pool from '../config/db.js'; 
 
 // Controlador para manejar el envío del formulario de contacto
 export const submitContactForm = async (req, res) => {
