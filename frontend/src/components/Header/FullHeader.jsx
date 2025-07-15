@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from '../../assets/hardman-logo.png';
 import { Navbar, Container, Nav, NavDropdown, Form, FormControl, Button, Badge } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom'; // Importa Link y useNavigate de react-router-dom
+import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
@@ -17,7 +17,7 @@ function FullHeader({ totalItemsInCart }) {
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
       <Container>
-        <Navbar.Brand as={Link} to="/"> 
+        <Navbar.Brand as={Link} to="/">
           <img
             src={logo}
             width="30"
@@ -39,10 +39,13 @@ function FullHeader({ totalItemsInCart }) {
 
             <Nav.Link as={Link} to="/contacto">Contacto</Nav.Link>
             <Nav.Link as={Link} to="/noticias">Noticias</Nav.Link>
-            
+
+            {/* Solo mostrar "Registrarse" si NO hay usuario logueado */}
+            {!user && <Nav.Link as={Link} to="/register">Registrarse</Nav.Link>}
+
             {/* Solo mostrar "Perfil" si hay usuario logueado */}
             {user && <Nav.Link as={Link} to="/perfil">Perfil</Nav.Link>}
-            
+
             {/* Dropdown solo para admin */}
             {user && user.role === 'admin' && (
               <NavDropdown title="Administrador" id="admin-nav-dropdown">
@@ -50,12 +53,12 @@ function FullHeader({ totalItemsInCart }) {
                 <NavDropdown.Item as={Link} to="/administrarProductos">Gestión de productos</NavDropdown.Item>
               </NavDropdown>
             )}
-            {/* Botón de cerrar sesión */}
-            {user ? (
+
+            {user ? ( 
               <Nav.Link as="button" onClick={handleLogout} style={{ border: 'none', background: 'none' }}>
                 Cerrar sesión
               </Nav.Link>
-            ) : (
+            ) : ( 
               <Nav.Link as={Link} to="/login">
                 Iniciar sesión
               </Nav.Link>

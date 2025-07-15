@@ -5,7 +5,7 @@ import ProductCardService from '../ProductCard/ProductCard';
 import { useAuth } from '../../context/AuthContext';
 import Cart from '../Cart/Cart';
 
-const API_URL = 'http://localhost:5001/products';
+const API_URL = 'http://localhost:3000/api/products';
 
 const ProductList = ({
   cartItems = [],
@@ -24,25 +24,36 @@ const ProductList = ({
   const [editingProduct, setEditingProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   
-  
-  
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
-        const data = await res.json();
-        setProducts(data);
-      } catch (err) {
-        setError('Error cargando productos: ' + err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+useEffect(() => {
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+      const data = await res.json();
+
+      const normalizedProducts = data.productos.map(p => ({
+        id: p.id_producto,        
+        name: p.nombre_producto,  
+        description: p.descripcion, 
+        price: parseFloat(p.precio_minorista), 
+        stock: p.stock,          
+        image: p.imagen_url,      
+        category: p.id_categoria, 
+      }));
+
+      setProducts(normalizedProducts); 
+    } catch (err) {
+      setError('Error cargando productos: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchProducts();
+}, []);
+
+
   
   const totalCartValue = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,

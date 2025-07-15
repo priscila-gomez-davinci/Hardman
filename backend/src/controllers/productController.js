@@ -4,10 +4,7 @@ import pool from '../config/db.js';
 export const getAllProducts = async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT p.*, c.nombre_categoria 
-            FROM producto AS p
-            JOIN categoria AS c ON p.id_categoria = c.id_categoria
-        `);
+            SELECT * FROM producto`);
         res.json({ productos: rows });
     } catch (error) {
         console.error('Error al obtener productos:', error);

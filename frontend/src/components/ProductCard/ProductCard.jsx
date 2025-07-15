@@ -1,10 +1,10 @@
+
 import React from 'react';
 import { Card, Button, Col } from 'react-bootstrap';
-import { useAuth } from '../../context/AuthContext'; 
+import { useAuth } from '../../context/AuthContext';
 
 const ProductCard = ({ product, onAddToCart, onEdit, onDelete }) => {
-  const { user } = useAuth(); 
-  
+  const { user } = useAuth();
 
   return (
     <Col sm={6} md={6} lg={4} className="mb-4">
@@ -18,7 +18,9 @@ const ProductCard = ({ product, onAddToCart, onEdit, onDelete }) => {
         <Card.Body className="d-flex flex-column">
           <Card.Title>{product.name}</Card.Title>
           <Card.Text>Categoría: {product.category}</Card.Text>
-          <Card.Text>Precio: ${product.price.toFixed(2)}</Card.Text>
+          <Card.Text>
+            Precio: ${typeof product.price === 'number' ? product.price.toFixed(2) : 'N/A'}
+          </Card.Text>
 
           {user?.role === 'user' && (
             <Button

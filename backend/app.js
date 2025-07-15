@@ -7,6 +7,7 @@ import productRoutes from './src/routes/productRoutes.js';
 import categoryRoutes from './src/routes/categoryRoutes.js'; 
 import repairOrderRoutes from './src/routes/repairOrderRoutes.js'; 
 import orderRoutes from './src/routes/orderRoutes.js'; 
+import authRoutes from './src/routes/authRoutes.js'; 
 
 
 
@@ -23,7 +24,9 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes); 
 app.use('/api/repair-orders', repairOrderRoutes); 
-app.use('/api/orders', orderRoutes); 
+app.use('/api/orders', orderRoutes);
+app.use('/api/auth', authRoutes); 
+
 
 
 

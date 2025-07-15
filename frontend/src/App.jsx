@@ -12,9 +12,11 @@ import News from './components/News/News';
 import Checkout from './components/Checkout/Checkout';
 import UserManagementPage from './components/UsersABM/UserManagementPage';
 import ProductManagementPage from './components/ProductABM/ProductManagementPage.jsx'
-import Login from './components/Auth/Login'; // Import the Login component
+import Login from './components/Auth/Login'; 
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
+import Register from './components/Auth/Register';
+import PublicOnlyRoute from './routes/PublicOnlyRoute'; 
 import NotFound from './routes/NotFound.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -82,14 +84,26 @@ function App() {
             <Route path="/contacto" element={<ContactForm />} />
             <Route path="/building" element={<Building />} />
             <Route path="/fixing" element={<Fixing />} />
+            <Route path="/news" element={<News />} /> 
+
             <Route
-              path="/users"
+              path="/register"
               element={
-                <PrivateRoute roles={['admin']}>
-                  <UserManagementPage />
-                </PrivateRoute>
+                <PublicOnlyRoute>
+                  <Register />
+                </PublicOnlyRoute>
               }
             />
+            <Route
+              path="/login" 
+              element={
+                <PublicOnlyRoute>
+                  <Login />
+                </PublicOnlyRoute>
+              }
+            />
+
+            {/* Rutas públicas (accesibles para todos, logeados o no) */}
             <Route
               path="/productos"
               element={
@@ -100,32 +114,51 @@ function App() {
                   handleRemoveFromCart={handleRemoveFromCart}
                   handleIncreaseQuantity={handleIncreaseQuantity}
                   handleDecreaseQuantity={handleDecreaseQuantity}
+                />
+              }
+            />
+
+            <Route
+              path="/checkout"
+              element={
+                <PrivateRoute> 
+                  <Checkout
+                    cartItems={cartItems}
+                    totalCartValue={totalCartValue}
+                    onClearCart={clearCart}
                   />
-                }
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/perfil"
+              element={
+                <PrivateRoute> {/* Perfil siempre requiere login */}
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Rutas de administración (requieren rol 'admin') */}
+            <Route
+              path="/users"
+              element={
+                <PrivateRoute roles={['admin']}>
+                  <UserManagementPage />
+                </PrivateRoute>
+              }
             />
             <Route
               path="/administrarProductos"
               element={
                 <PrivateRoute roles={['admin']}>
-                <ProductManagementPage />
+                  <ProductManagementPage />
                 </PrivateRoute>
-                }
-            />
-            <Route
-              path="/checkout"
-              element={
-                <Checkout
-                  cartItems={cartItems}
-                  totalCartValue={totalCartValue}
-                  onClearCart={clearCart}
-                />
               }
             />
-            <Route path="/perfil" element={<Profile />} />
-            <Route path="/noticias" element={<News />} />
-            <Route path="/login" element={<Login />} />
+
             <Route path="/notfound" element={<NotFound />} />
-            <Route path="*" element={<NotFound />} /> {/* Ruta comodín */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
 
           <Footer />
