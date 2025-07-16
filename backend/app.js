@@ -8,6 +8,8 @@ import categoryRoutes from './src/routes/categoryRoutes.js';
 import repairOrderRoutes from './src/routes/repairOrderRoutes.js'; 
 import orderRoutes from './src/routes/orderRoutes.js'; 
 import authRoutes from './src/routes/authRoutes.js'; 
+import userRoutes from './src/routes/userRoutes.js'; 
+
 
 
 
@@ -26,6 +28,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/repair-orders', repairOrderRoutes); 
 app.use('/api/orders', orderRoutes);
 app.use('/api/auth', authRoutes); 
+app.use('/api/users', userRoutes); 
+
 
 
 
