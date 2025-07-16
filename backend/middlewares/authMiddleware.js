@@ -22,9 +22,8 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// Middleware de autorización (ejemplo para un rol de administrador)
 const isAdmin = (req, res, next) => {
-    if (req.userRole !== 1) { // Asumiendo que 1 es el ID del rol de administrador
+    if (req.userRole !== 1) { 
         return res.status(403).json({ message: 'Acceso denegado. Se requiere rol de administrador.' });
     }
     next();

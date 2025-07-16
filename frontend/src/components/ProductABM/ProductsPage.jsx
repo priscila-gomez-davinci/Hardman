@@ -8,7 +8,7 @@ function ProductsPage() {
 
   useEffect(() => {
     if (user?.role === 'admin') {
-      fetch('http://localhost:5001/products')
+      fetch('http://localhost:3000/products')
         .then(res => res.json())
         .then(data => setProducts(data));
     }

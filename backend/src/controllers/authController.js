@@ -74,7 +74,7 @@ export const registerUser = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        const [userRoleRows] = await pool.query("SELECT id_rol FROM rol WHERE nombre_rol = 'cliente'");
+        const [userRoleRows] = await pool.query("SELECT id_rol FROM rol WHERE nombre_rol = 'user'");
         let id_rol_usuario;
         if (userRoleRows.length > 0) {
             id_rol_usuario = userRoleRows[0].id_rol;

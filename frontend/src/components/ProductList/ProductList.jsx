@@ -83,14 +83,10 @@ useEffect(() => {
     setShowEditModal(true);
   };
   
-// src/components/ProductList/ProductList.jsx
-
-// ... (todo el código existente) ...
-
   const saveEditedProduct = async () => {
     try {
       console.log('--- INTENTANDO GUARDAR PRODUCTO ---');
-      console.log('editingProduct (desde el modal - camelCase):', editingProduct); // Lo que el modal está enviando
+      console.log('editingProduct (desde el modal - camelCase):', editingProduct); 
 
       const dataToSend = {
         nombre_producto: editingProduct.name,
@@ -99,12 +95,12 @@ useEffect(() => {
         precio_mayorista: editingProduct.wholesalePrice ? parseFloat(editingProduct.wholesalePrice) : null,
         stock: parseInt(editingProduct.stock, 10),
         imagen_url: editingProduct.image,
-        sku: editingProduct.sku || null, // Asegúrate de que esto sea correcto si no está en el modal
+        sku: editingProduct.sku || null, 
         activo: editingProduct.active !== undefined ? (editingProduct.active ? 1 : 0) : 1,
         id_categoria: parseInt(editingProduct.category, 10),
       };
 
-      console.log('dataToSend (mapeado para el backend - snake_case):', dataToSend); // Lo que REALMENTE se enviará
+      console.log('dataToSend (mapeado para el backend - snake_case):', dataToSend); 
       console.log('URL de la petición PUT:', `${API_URL}/${editingProduct.id}`);
 
       const res = await fetch(`${API_URL}/${editingProduct.id}`, {
@@ -117,7 +113,7 @@ useEffect(() => {
 
       if (!res.ok) {
         const errorData = await res.json();
-        console.error('Error detallado desde el backend:', errorData); // Imprime el error del backend
+        console.error('Error detallado desde el backend:', errorData); 
         throw new Error(`Error al editar: HTTP ${res.status}. Mensaje: ${errorData.message || 'Error desconocido.'}`);
       }
 
@@ -127,7 +123,7 @@ useEffect(() => {
       console.log('--- PRODUCTO GUARDADO EXITOSAMENTE ---');
     } catch (error) {
       alert('Error al guardar los cambios: ' + error.message);
-      console.error('Error al guardar los cambios (frontend catch):', error); // Mensaje del catch
+      console.error('Error al guardar los cambios (frontend catch):', error); 
     } finally {
       setLoading(false);
     }
@@ -224,7 +220,7 @@ return (
           />
         </Form.Group>
         <Form.Group className="mt-3">
-          <Form.Label>URL de Imagen</Form.Label> {/* Título más claro */}
+          <Form.Label>URL de Imagen</Form.Label> 
           <Form.Control
             type="text"
             value={editingProduct.image}
@@ -238,7 +234,7 @@ return (
         </Form.Group>
 
         <Form.Group className="mt-3">
-          <Form.Label>Precio Minorista</Form.Label> {/* Título más específico */}
+          <Form.Label>Precio Minorista</Form.Label> 
           <Form.Control
             type="number"
             value={editingProduct.price}
@@ -250,7 +246,6 @@ return (
             }
           />
         </Form.Group>
-        {/* CORRECCIÓN: 'stock' a parseInt */}
         <Form.Group className="mt-3">
           <Form.Label>Stock</Form.Label>
           <Form.Control
@@ -259,12 +254,12 @@ return (
             onChange={(e) =>
               setEditingProduct({
                 ...editingProduct,
-                stock: parseInt(e.target.value, 10), // <-- Cambiado a parseInt
+                stock: parseInt(e.target.value, 10), 
               })
             }
           />
         </Form.Group>
-        {editingProduct.wholesalePrice !== undefined && ( // Solo muestra si existe la propiedad
+        {editingProduct.wholesalePrice !== undefined && ( 
           <Form.Group className="mt-3">
             <Form.Label>Precio Mayorista</Form.Label>
             <Form.Control
