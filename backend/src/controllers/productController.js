@@ -17,9 +17,8 @@ export const getProductById = async (req, res) => {
     try {
         const { id } = req.params;
         const [rows] = await pool.query(`
-            SELECT p.*, c.nombre_categoria 
+            SELECT  
             FROM producto AS p
-            JOIN categoria AS c ON p.id_categoria = c.id_categoria
             WHERE p.id_producto = ?
         `, [id]);
 
@@ -37,10 +36,6 @@ export const getProductById = async (req, res) => {
 export const createProduct = async (req, res) => {
     try {
         const { nombre_producto, descripcion, precio_minorista, precio_mayorista, stock, imagen_url, sku, activo, id_categoria } = req.body;
-
-        if (!nombre_producto || !precio_minorista || stock === undefined || !sku || !id_categoria) {
-            return res.status(400).json({ message: 'Faltan campos obligatorios.' });
-        }
         
         const [result] = await pool.query(
             'INSERT INTO producto (nombre_producto, descripcion, precio_minorista, precio_mayorista, stock, imagen_url, sku, activo, id_categoria) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -59,26 +54,52 @@ export const createProduct = async (req, res) => {
 // --- ACTUALIZAR UN PRODUCTO ---
 export const updateProduct = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { nombre_producto, descripcion, precio_minorista, precio_mayorista, stock, imagen_url, sku, activo, id_categoria } = req.body;
+        const { id } = req.params; // ID desde la URL
+        const { nombre_producto, descripcion, precio_minorista, precio_mayorista, stock, imagen_url, sku, activo, id_categoria } = req.body; // Datos del cuerpo de la petición
 
-        if (!nombre_producto || !precio_minorista || stock === undefined || !sku || !id_categoria) {
-            return res.status(400).json({ message: 'Faltan campos obligatorios.' });
-        }
+        console.log('--- INTENTANDO ACTUALIZAR PRODUCTO EN BACKEND ---');
+        console.log('ID recibido en params:', id);
+        console.log('Body recibido (req.body):', req.body); // Ver todo el body recibido
+
+        // Parámetros para la consulta SQL (antes de ejecutarla)
+        const queryParams = [
+            nombre_producto,
+            descripcion || null,
+            precio_minorista,
+            precio_mayorista || null,
+            stock,
+            imagen_url || null,
+            sku,
+            activo !== undefined ? activo : 1, // Si activo es undefined, por defecto 1
+            id_categoria,
+            id // El ID para la cláusula WHERE
+        ];
+        console.log('Parámetros para la consulta SQL:', queryParams);
 
         const [result] = await pool.query(
             'UPDATE producto SET nombre_producto = ?, descripcion = ?, precio_minorista = ?, precio_mayorista = ?, stock = ?, imagen_url = ?, sku = ?, activo = ?, id_categoria = ? WHERE id_producto = ?',
-            [nombre_producto, descripcion || null, precio_minorista, precio_mayorista || null, stock, imagen_url || null, sku, activo !== undefined ? activo : 1, id_categoria, id]
+            queryParams // Usa los parámetros definidos
         );
 
+        console.log('Resultado de la operación UPDATE en DB:', result);
+
         if (result.affectedRows === 0) {
+            console.warn('Advertencia: Producto no encontrado para actualizar con ID:', id);
             return res.status(404).json({ message: 'Producto no encontrado.' });
         }
         res.json({ message: 'Producto actualizado exitosamente.' });
+        console.log('--- PRODUCTO ACTUALIZADO EXITOSAMENTE EN BACKEND ---');
+
     } catch (error) {
-        console.error('Error al actualizar producto:', error);
+        console.error('ERROR CRÍTICO en updateProduct (backend):', error); // Aquí verás el error detallado de la DB
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({ message: 'El SKU ya está en uso por otro producto.' });
+        }
+        // Este else-if es importante para capturar otros errores de DB que no sean ER_DUP_ENTRY
+        // Por ejemplo, ER_BAD_NULL_ERROR si intentas poner NULL en un campo NOT NULL
+        // o ER_NO_REFERENCED_ROW_2 si id_categoria no existe
+        else if (error.code) { // Si es un error de MySQL con un código específico
+             return res.status(400).json({ message: `Error de base de datos: ${error.code} - ${error.sqlMessage || error.message}` });
         }
         res.status(500).json({ message: 'Error interno del servidor.' });
     }

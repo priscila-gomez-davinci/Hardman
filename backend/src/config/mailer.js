@@ -1,4 +1,4 @@
-// src/config/mailer.js
+
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
@@ -9,7 +9,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Opcional: Probar la conexión del transporter al iniciar
 transporter.verify(function(error, success) {
     if (error) {
         console.error('Error al verificar Nodemailer transporter:', error);
@@ -19,4 +18,4 @@ transporter.verify(function(error, success) {
 });
 
 
-module.exports = transporter; // Exportamos directamente el objeto transporter
+module.exports = transporter; 

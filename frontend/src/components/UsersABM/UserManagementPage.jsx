@@ -3,7 +3,7 @@ import { Container, Button, Alert, Spinner } from 'react-bootstrap';
 import UserList from './UserList';
 import UserForm from './UserForm';
 
-const API_URL = 'http://localhost:5001/users'; // Replica esto pero con /products Lucas
+const API_URL = 'http://localhost:3000/users'; // Replica esto pero con /products Lucas
 
 function UserManagementPage() {
   const [users, setUsers] = useState([]);

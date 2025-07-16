@@ -24,8 +24,8 @@ const ProductList = ({
   const [editingProduct, setEditingProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   
-useEffect(() => {
-  const fetchProducts = async () => {
+
+    const fetchProducts = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -50,11 +50,12 @@ useEffect(() => {
       setLoading(false);
     }
   };
+
+useEffect(() => {
   fetchProducts();
 }, []);
 
 
-  
   const totalCartValue = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -82,26 +83,55 @@ useEffect(() => {
     setShowEditModal(true);
   };
   
+// src/components/ProductList/ProductList.jsx
+
+// ... (todo el código existente) ...
+
   const saveEditedProduct = async () => {
     try {
+      console.log('--- INTENTANDO GUARDAR PRODUCTO ---');
+      console.log('editingProduct (desde el modal - camelCase):', editingProduct); // Lo que el modal está enviando
+
+      const dataToSend = {
+        nombre_producto: editingProduct.name,
+        descripcion: editingProduct.description,
+        precio_minorista: parseFloat(editingProduct.price),
+        precio_mayorista: editingProduct.wholesalePrice ? parseFloat(editingProduct.wholesalePrice) : null,
+        stock: parseInt(editingProduct.stock, 10),
+        imagen_url: editingProduct.image,
+        sku: editingProduct.sku || null, // Asegúrate de que esto sea correcto si no está en el modal
+        activo: editingProduct.active !== undefined ? (editingProduct.active ? 1 : 0) : 1,
+        id_categoria: parseInt(editingProduct.category, 10),
+      };
+
+      console.log('dataToSend (mapeado para el backend - snake_case):', dataToSend); // Lo que REALMENTE se enviará
+      console.log('URL de la petición PUT:', `${API_URL}/${editingProduct.id}`);
+
       const res = await fetch(`${API_URL}/${editingProduct.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingProduct),
+        body: JSON.stringify(dataToSend),
       });
-      
-      if (!res.ok) throw new Error('Error al editar');
-      
-      const updated = await res.json();
-      setProducts((prev) =>
-        prev.map((p) => (p.id === updated.id ? updated : p))
-    );
-    setShowEditModal(false);
-  } catch (error) {
-    alert('Error al guardar los cambios');
-    console.error(error);
-  }
-};
+
+      console.log('Respuesta de la API - status:', res.status);
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Error detallado desde el backend:', errorData); // Imprime el error del backend
+        throw new Error(`Error al editar: HTTP ${res.status}. Mensaje: ${errorData.message || 'Error desconocido.'}`);
+      }
+
+      await fetchProducts();
+      setShowEditModal(false);
+      setEditingProduct(null);
+      console.log('--- PRODUCTO GUARDADO EXITOSAMENTE ---');
+    } catch (error) {
+      alert('Error al guardar los cambios: ' + error.message);
+      console.error('Error al guardar los cambios (frontend catch):', error); // Mensaje del catch
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 const handleGoToCheckout = () => {
@@ -163,7 +193,7 @@ return (
         </Col>
       )}
       </Row>
-      {showEditModal && editingProduct && (
+{showEditModal && editingProduct && (
   <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
     <Modal.Header closeButton>
       <Modal.Title>Editar Producto</Modal.Title>
@@ -193,21 +223,8 @@ return (
             }
           />
         </Form.Group>
-                <Form.Group className="mt-3">
-          <Form.Label>Categoría</Form.Label>
-          <Form.Control
-            type="text"
-            value={editingProduct.categoria}
-            onChange={(e) =>
-              setEditingProduct({
-                ...editingProduct,
-                categoria: e.target.value,
-              })
-            }
-          />
-        </Form.Group>
-                <Form.Group className="mt-3">
-          <Form.Label>URL</Form.Label>
+        <Form.Group className="mt-3">
+          <Form.Label>URL de Imagen</Form.Label> {/* Título más claro */}
           <Form.Control
             type="text"
             value={editingProduct.image}
@@ -221,7 +238,7 @@ return (
         </Form.Group>
 
         <Form.Group className="mt-3">
-          <Form.Label>Precio</Form.Label>
+          <Form.Label>Precio Minorista</Form.Label> {/* Título más específico */}
           <Form.Control
             type="number"
             value={editingProduct.price}
@@ -233,7 +250,8 @@ return (
             }
           />
         </Form.Group>
-                <Form.Group className="mt-3">
+        {/* CORRECCIÓN: 'stock' a parseInt */}
+        <Form.Group className="mt-3">
           <Form.Label>Stock</Form.Label>
           <Form.Control
             type="number"
@@ -241,11 +259,27 @@ return (
             onChange={(e) =>
               setEditingProduct({
                 ...editingProduct,
-                stock: parseFloat(e.target.value),
+                stock: parseInt(e.target.value, 10), // <-- Cambiado a parseInt
               })
             }
           />
         </Form.Group>
+        {editingProduct.wholesalePrice !== undefined && ( // Solo muestra si existe la propiedad
+          <Form.Group className="mt-3">
+            <Form.Label>Precio Mayorista</Form.Label>
+            <Form.Control
+              type="number"
+              value={editingProduct.wholesalePrice}
+              onChange={(e) =>
+                setEditingProduct({
+                  ...editingProduct,
+                  wholesalePrice: parseFloat(e.target.value),
+                })
+              }
+            />
+          </Form.Group>
+        )}
+        {/* ***************************************************************** */}
       </Form>
     </Modal.Body>
     <Modal.Footer>

@@ -3,7 +3,7 @@ import { Container, Button, Alert, Spinner } from 'react-bootstrap';
 import ProductList from '../ProductList/ProductList';
 import ProductForm from './ProductForm';
 
-const API_URL = 'http://localhost:5001/products'; // Replica esto pero con /products Lucas
+const API_URL = 'http://localhost:3000/api/products'; // Replica esto pero con /products Lucas
 
 function ProductManagementPage() {
   const [products, setProducts] = useState([]);
@@ -34,48 +34,60 @@ function ProductManagementPage() {
     }
   };
 
-  const handleSaveProduct = async (productToSave) => {
+const handleSaveProduct = async (productToSave) => {
     setLoading(true);
     setError(null);
     try {
-      let response;
-      let method;
-      let url;
-      let bodyData = { ...productToSave };
+        let response;
+        let method;
+        let url;
 
-      if (productToSave.id) {
-        method = 'PUT';
-        url = `${API_URL}/${productToSave.id}`;
-      } else {
-        method = 'POST';
-        url = API_URL;
+        const dataToSend = {
+            id_producto: productToSave.id, // Solo si es PUT
+            nombre_producto: productToSave.name,
+            descripcion: productToSave.description,
+            // Asegúrate de convertir los precios a números si vienen como string del formulario
+            precio_minorista: parseFloat(productToSave.price),
+            // Si tienes un precio_mayorista, mapearlo también
+            // precio_mayorista: parseFloat(productToSave.wholesalePrice),
+            stock: parseInt(productToSave.stock, 10), // Convertir stock a entero
+            imagen_url: productToSave.image,
+            sku: productToSave.sku,
+            activo: productToSave.active ? 1 : 0, // Si 'activo' es un booleano en el front
+            id_categoria: parseInt(productToSave.category, 10) // Asegúrate que 'category' tenga el ID de la categoría
+        };
 
-        // Esto resuelve el error de counting de los ids para que sean consecutivos
-        const maxId = products.reduce((max, user) => Math.max(max, Number(user.id)), 0);
-        bodyData.id = String(maxId + 1); 
-      }
+        if (productToSave.id) {
+            method = 'PUT';
+            url = `${API_URL}/${productToSave.id}`;
+        } else {
+            method = 'POST';
+            url = API_URL;
+        }
 
-      response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bodyData),
-      });
+        response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dataToSend), // ¡Enviar los datos mapeados!
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      await fetchProducts(); 
-      setShowForm(false); 
-      setEditingProduct(null); 
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`HTTP error! status: ${response.status}. Mensaje: ${errorData.message || 'Error desconocido'}`);
+        }
+        await fetchProducts();
+        setShowForm(false);
+        setEditingProduct(null);
     } catch (err) {
-      setError('Error al guardar producto: ' + err.message);
-      console.error('Error saving product:', err);
+        setError('Error al guardar producto: ' + err.message);
+        console.error('Error saving product:', err);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
 
   const handleDeleteProduct = async (id) => {
     if (!window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
