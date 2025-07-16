@@ -8,7 +8,6 @@ import ProductList from './components/ProductList/ProductList';
 import Header from './components/Header/FullHeader'; 
 import Footer from './components/Footer/Footer';
 import Profile from './components/Profile/Profile';
-import News from './components/News/News';
 import Checkout from './components/Checkout/Checkout';
 import UserManagementPage from './components/UsersABM/UserManagementPage';
 import ProductManagementPage from './components/ProductABM/ProductManagementPage.jsx'
@@ -84,8 +83,6 @@ function App() {
             <Route path="/contacto" element={<ContactForm />} />
             <Route path="/building" element={<Building />} />
             <Route path="/fixing" element={<Fixing />} />
-            <Route path="/news" element={<News />} /> 
-
             <Route
               path="/register"
               element={

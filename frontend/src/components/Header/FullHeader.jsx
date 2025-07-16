@@ -38,7 +38,6 @@ function FullHeader({ totalItemsInCart }) {
             </NavDropdown>
 
             <Nav.Link as={Link} to="/contacto">Contacto</Nav.Link>
-            <Nav.Link as={Link} to="/noticias">Noticias</Nav.Link>
 
             {/* Solo mostrar "Registrarse" si NO hay usuario logueado */}
             {!user && <Nav.Link as={Link} to="/register">Registrarse</Nav.Link>}
