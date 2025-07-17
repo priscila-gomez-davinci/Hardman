@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
+
 function FullHeader({ totalItemsInCart }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -50,6 +51,8 @@ function FullHeader({ totalItemsInCart }) {
               <NavDropdown title="Administrador" id="admin-nav-dropdown">
                 <NavDropdown.Item as={Link} to="/users">Gestión de usuarios</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/administrarProductos">Gestión de productos</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/administrarPedidos">Gestión de carritos</NavDropdown.Item>
+
               </NavDropdown>
             )}
 

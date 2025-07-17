@@ -17,6 +17,7 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
 import PublicOnlyRoute from './routes/PublicOnlyRoute';
 import NotFound from './routes/NotFound.jsx';
+import OrderManagementPage from './components/Cart/OrderManagementPage'; 
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -56,6 +57,15 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/administrarPedidos"
+              element={
+                <PrivateRoute roles={['admin']}>
+                  <OrderManagementPage /> 
+                </PrivateRoute>
+              }
+            />
+
             <Route path="/perfil" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
             <Route

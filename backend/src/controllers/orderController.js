@@ -7,33 +7,91 @@ const generateTrackingNumber = () => {
     const max = 2_000_000_000;
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
-// --- OBTENER TODOS LOS PEDIDOS CON SUS DETALLES ---
+
+// --- OBTENER TODOS LOS PEDIDOS CON SUS DETALLES (CORREGIDO Y MEJORADO) ---
+// src/controllers/orderController.js (MODIFICADO)
+
+import pool from '../config/db.js';
+
+// ... (todas tus otras funciones: generateTrackingNumber, createOrder, getUserActiveCartOrCreate, getOrderById, updateOrderStatus, deleteOrder) ...
+
+// --- OBTENER TODOS LOS PEDIDOS CON SUS DETALLES (ORDENADOS POR ESTADO) ---
 export const getAllOrders = async (req, res) => {
     try {
         const [pedidos] = await pool.query(`
-            SELECT p.*, u.name AS nombre_usuario, u.email AS email_usuario, mp.nombre_metodo_pago
+            SELECT
+                p.id_pedido,
+                p.fecha_pedido,
+                p.estado_pedido,
+                p.total_pedido,
+                p.direccion_envio,
+                p.numero_de_seguimiento,
+                p.id_usuario,
+                u.nombre AS nombre_usuario,
+                u.apellido AS apellido_usuario,
+                u.email AS email_usuario
             FROM pedido AS p
-            JOIN users AS u ON p.id_usuario = u.id
-            JOIN metodo_pago AS mp ON p.id_metodo_pago = mp.id_metodo_pago
+            LEFT JOIN usuario AS u ON p.id_usuario = u.id_usuario
+            
+            -- --- ¡CORRECCIÓN AQUÍ! ORDENAR POR ESTADO PENDIENTE PRIMERO ---
+            ORDER BY
+                CASE p.estado_pedido
+                    WHEN 'pendiente' THEN 1      -- Pendiente (primero)
+                    WHEN 'procesando' THEN 2     -- Procesando (segundo)
+                    WHEN 'enviado' THEN 3        -- Enviado (tercero)
+                    WHEN 'entregado' THEN 4      -- Entregado (cuarto)
+                    WHEN 'cancelado' THEN 5      -- Cancelado (último, o donde quieras que aparezca)
+                    ELSE 99                      -- Cualquier otro estado desconocido al final
+                END ASC,                        -- Ordenar por esta prioridad de forma ascendente
+                p.fecha_pedido DESC;            -- Luego, por fecha (más reciente primero) para el mismo estado
         `);
 
-        // Para cada pedido, obtenemos sus detalles
-        for (let pedido of pedidos) {
-            const [detalles] = await pool.query(`
-                SELECT dp.*, prod.nombre_producto, prod.sku
-                FROM detalle_pedido AS dp
-                JOIN producto AS prod ON dp.id_producto = prod.id_producto
-                WHERE dp.id_pedido = ?
-            `, [pedido.id_pedido]);
-            pedido.detalles = detalles;
+        if (pedidos.length === 0) {
+            return res.json({ orders: [] });
         }
 
-        res.json({ pedidos });
+        const pedidoIds = pedidos.map(p => p.id_pedido);
+        const [detalles] = await pool.query(`
+            SELECT
+                dp.id_detalle_pedido,
+                dp.id_pedido,
+                dp.id_producto,
+                prod.nombre_producto,
+                prod.sku,
+                prod.imagen_url,
+                dp.cantidad,
+                dp.precio_unitario,
+                dp.sub_total
+            FROM detalle_pedido AS dp
+            JOIN producto AS prod ON dp.id_producto = prod.id_producto
+            WHERE dp.id_pedido IN (${pedidoIds.join(',')});
+        `);
+
+        const pedidosMap = new Map(pedidos.map(p => [p.id_pedido, {
+            id: p.id_pedido, date: p.fecha_pedido, status: p.estado_pedido, total: parseFloat(p.total_pedido),
+            shippingAddress: p.direccion_envio, trackingNumber: p.numero_de_seguimiento, userId: p.id_usuario,
+            userName: p.nombre_usuario, userLastName: p.apellido_usuario, userEmail: p.email_usuario, details: []
+        }]));
+
+        detalles.forEach(d => {
+            if (pedidosMap.has(d.id_pedido)) {
+                pedidosMap.get(d.id_pedido).details.push({
+                    id: d.id_detalle_pedido, productId: d.id_producto, productName: d.nombre_producto,
+                    productSku: d.sku, productImage: d.imagen_url, quantity: d.cantidad,
+                    unitPrice: parseFloat(d.precio_unitario), subTotal: parseFloat(d.sub_total)
+                });
+            }
+        });
+
+        res.json({ orders: Array.from(pedidosMap.values()) });
+
     } catch (error) {
-        console.error('Error al obtener pedidos:', error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        console.error('Error al obtener todos los pedidos (getAllOrders):', error);
+        res.status(500).json({ message: 'Error interno del servidor al obtener pedidos.' + (error.sqlMessage || error.message) });
     }
 };
+
+// ... (resto de orderController.js) ...
 
 // --- OBTENER UN PEDIDO POR ID CON SUS DETALLES ---
 export const getOrderById = async (req, res) => {
