@@ -81,8 +81,6 @@ function UserManagementPage() {
       } else { 
         method = 'POST';
         url = API_URL;
-        // const maxId = users.reduce((max, u) => Math.max(max, Number(u.id)), 0);
-        // dataToSend.id_usuario = String(maxId + 1); // Solo si tu DB NO es AUTO_INCREMENT
       }
 
       response = await fetch(url, {
