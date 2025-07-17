@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, ListGroup, Form, Button, Alert } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react'; // Agregamos useEffect
+import { Container, Row, Col, ListGroup, Form, Button, Alert, Spinner } from 'react-bootstrap'; // Agregamos Spinner
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // Para obtener el usuario logueado
+
+const API_ORDER_URL = 'http://localhost:3000/api/orders'; // Asumiendo que tendrás un endpoint para pedidos
+// Si no tienes este endpoint, te ayudaré a crearlo después.
 
 const Checkout = ({ cartItems, totalCartValue, onClearCart }) => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Obtener el usuario logueado
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -11,27 +16,105 @@ const Checkout = ({ cartItems, totalCartValue, onClearCart }) => {
     direccion: '',
     ciudad: '',
     codigoPostal: '',
+    // Puedes añadir 'provincia' si tu formulario lo tiene, tu DB sí
+    provincia: '', 
   });
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [loading, setLoading] = useState(false); // Nuevo estado de carga
+  const [error, setError] = useState(null); // Nuevo estado de error
+
+  // Rellenar formData automáticamente si el usuario está logueado
+  useEffect(() => {
+    if (user) {
+      setFormData(prevData => ({
+        ...prevData,
+        nombre: user.name || '',
+        apellido: user.lastName || '',
+        email: user.email || '',
+        // Asumo que tienes campos de dirección en tu objeto de usuario
+        direccion: user.address || '', 
+        ciudad: user.city || '',
+        provincia: user.province || '',
+        // Si tienes código postal en el usuario, también lo mapearías aquí
+        // codigoPostal: user.zipCode || '', 
+      }));
+    }
+  }, [user]); // Se ejecuta cuando el usuario cambia
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí es donde normalmente enviarías los datos del pedido a un backend
-    console.log('Datos del pedido:', { items: cartItems, total: totalCartValue, customerInfo: formData });
+    setLoading(true); // Iniciar carga
+    setError(null); // Limpiar errores previos
 
-    // Simulación de una compra exitosa
-    setOrderPlaced(true);
-    onClearCart(); // Vacía el carrito después de la "compra"
+    try {
+      if (cartItems.length === 0) {
+        throw new Error('El carrito está vacío. No se puede realizar el pedido.');
+      }
 
-    // Podrías redirigir a una página de confirmación después de unos segundos
-    setTimeout(() => {
-      navigate('/'); // Volver a la página principal
-    }, 3000);
+      // Preparar los datos del pedido para enviar al backend
+      const orderData = {
+        id_usuario: user ? user.id : null, // Si el usuario está logueado, usar su ID
+        nombre_cliente: formData.nombre,
+        apellido_cliente: formData.apellido,
+        email_cliente: formData.email,
+        direccion_envio: formData.direccion,
+        ciudad_envio: formData.ciudad,
+        provincia_envio: formData.provincia, // Asegúrate de que este campo exista en el formulario
+        codigo_postal: formData.codigoPostal,
+        total_pedido: totalCartValue,
+        // No estamos incluyendo id_metodo_pago aquí, pero lo puedes añadir al formulario
+        // y pasarlo si tu tabla 'pedido' lo espera.
+        // Asumo que 'detalle_pedido' en la DB tiene id_metodo_pago,
+        // pero es más común a nivel de 'pedido'. Tendrás que decidir dónde ponerlo.
+        
+        // Incluir los ítems del carrito para que el backend cree los detalle_pedido
+        items: cartItems.map(item => ({
+          id_producto: item.id,
+          cantidad: item.quantity,
+          precio_unitario: item.price, // Precio unitario al momento de la compra
+          // Si id_metodo_pago va por cada detalle_pedido, lo incluirías aquí
+          // id_metodo_pago: item.metodoPagoId,
+        })),
+      };
+
+    console.log('orderData COMPLETO que se enviará al backend:', orderData); // <-- Revisa esto
+    console.log('orderData.items (el array de items):', orderData.items); // <-- Revisa esto
+
+    
+      const response = await fetch(API_ORDER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Error al procesar el pedido: HTTP ${response.status}. Mensaje: ${errorData.message || 'Error desconocido.'}`);
+      }
+
+      const result = await response.json();
+      console.log('Pedido realizado con éxito:', result);
+
+      setOrderPlaced(true);
+      onClearCart(); // Vacía el carrito después de la compra
+
+      setTimeout(() => {
+        navigate('/'); // Volver a la página principal
+      }, 3000);
+
+    } catch (err) {
+      setError(err.message || 'Hubo un error al confirmar tu compra. Intenta de nuevo.');
+      console.error('Error al confirmar compra:', err);
+    } finally {
+      setLoading(false); // Finalizar carga
+    }
   };
 
   if (cartItems.length === 0 && !orderPlaced) {
@@ -40,7 +123,7 @@ const Checkout = ({ cartItems, totalCartValue, onClearCart }) => {
         <Alert variant="warning">
           Tu carrito está vacío. Por favor, agrega productos antes de proceder al pago.
         </Alert>
-        <Button variant="primary" onClick={() => navigate('/')}>
+        <Button variant="primary" onClick={() => navigate('/productos')}> {/* Enlazar a /productos */}
           Volver a la Tienda
         </Button>
       </Container>
@@ -67,6 +150,9 @@ const Checkout = ({ cartItems, totalCartValue, onClearCart }) => {
               <strong>${totalCartValue.toFixed(2)}</strong>
             </ListGroup.Item>
           </ListGroup>
+
+          {loading && <div className="text-center mb-3"><Spinner animation="border" role="status"><span className="visually-hidden">Procesando...</span></Spinner></div>}
+          {error && <Alert variant="danger">{error}</Alert>}
 
           {orderPlaced ? (
             <Alert variant="success">
@@ -103,20 +189,26 @@ const Checkout = ({ cartItems, totalCartValue, onClearCart }) => {
                     <Form.Control type="text" name="ciudad" value={formData.ciudad} onChange={handleInputChange} required />
                   </Form.Group>
 
-                  <Form.Group as={Col} controlId="formGridZip">
-                    <Form.Label>Código Postal</Form.Label>
-                    <Form.Control type="text" name="codigoPostal" value={formData.codigoPostal} onChange={handleInputChange} required />
+                  {/* Agregado campo Provincia, si tu base de datos lo tiene en 'pedido' */}
+                  <Form.Group as={Col} controlId="formGridProvincia">
+                    <Form.Label>Provincia</Form.Label>
+                    <Form.Control type="text" name="provincia" value={formData.provincia} onChange={handleInputChange} required />
                   </Form.Group>
                 </Row>
 
-                <Button variant="primary" type="submit" disabled={cartItems.length === 0}>
+                <Form.Group className="mb-3" controlId="formGridZip">
+                  <Form.Label>Código Postal</Form.Label>
+                  <Form.Control type="text" name="codigoPostal" value={formData.codigoPostal} onChange={handleInputChange} required />
+                </Form.Group>
+
+                <Button variant="primary" type="submit" disabled={cartItems.length === 0 || loading}>
                   Confirmar Compra
                 </Button>
               </Form>
             </>
           )}
         </Col>
-        <Col md={5} className="d-none d-md-block"> {/* Puedes agregar una imagen o banner aquí */}
+        <Col md={5} className="d-none d-md-block">
           <img
             src="https://via.placeholder.com/400x300/F0F0F0/000000?text=Procesando+Pago"
             alt="Procesando pago"

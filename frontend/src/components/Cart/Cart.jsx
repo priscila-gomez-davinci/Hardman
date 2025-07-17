@@ -1,40 +1,65 @@
 import React from 'react';
-import { ListGroup, Button, Image, Alert } from 'react-bootstrap';
+import { ListGroup, Button, Alert } from 'react-bootstrap';
 
-const Cart = ({ cartItems, onRemoveFromCart, onIncreaseQuantity, onDecreaseQuantity, totalCartValue }) => {
+const Cart = ({
+  cartItems = [],
+  onRemoveFromCart, // Recibe el ítem completo del carrito
+  onIncreaseQuantity, // Recibe el ítem completo del carrito
+  onDecreaseQuantity, // Recibe el ítem completo del carrito
+  totalCartValue,
+  onClearCart // Recibe la función para vaciar
+}) => {
+  // console.log("Items en Cart.jsx:", cartItems); // Para depuración
+
+  if (!cartItems || cartItems.length === 0) {
+    return <Alert variant="info">Tu carrito está vacío.</Alert>;
+  }
+
   return (
     <div>
-      {cartItems.length === 0 ? (
-        <Alert variant="info">Tu carrito está vacío.</Alert>
-      ) : (
-        <>
-          <ListGroup>
-            {cartItems.map((item) => (
-              <ListGroup.Item key={item.id} className="d-flex align-items-center justify-content-between mb-2">
-                <Image src={item.image} rounded style={{ width: '50px', height: '50px', marginRight: '10px', objectFit: 'cover' }} />
-                <div className="flex-grow-1">
-                  <h5>{item.name}</h5>
-                  <p className="mb-0">${item.price.toFixed(2)} x {item.quantity}</p>
-                </div>
-                <div className="d-flex align-items-center">
-                  <Button variant="outline-secondary" size="sm" onClick={() => onDecreaseQuantity(item.id)}>-</Button>
-                  <span className="mx-2">{item.quantity}</span>
-                  <Button variant="outline-secondary" size="sm" onClick={() => onIncreaseQuantity(item.id)}>+</Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    className="ms-3"
-                    onClick={() => onRemoveFromCart(item.id)}
-                  >
-                    Eliminar
-                  </Button>
-                </div>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-          <h4 className="mt-4 text-end">Total del Carrito: ${totalCartValue.toFixed(2)}</h4>
-        </>
-      )}
+      <ListGroup className="mb-3">
+        {cartItems.map((item) => (
+          // Asegúrate que item.detalleId exista y sea único como key
+          <ListGroup.Item key={item.detalleId} className="d-flex justify-content-between align-items-center">
+            <div>
+              {item.name} <br />
+              <small>Cantidad: {item.quantity}</small>
+            </div>
+            <div>
+              <span>${(item.price * item.quantity).toFixed(2)}</span>
+              {/* Pasa el ítem completo a las funciones de manejo */}
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                className="ms-2"
+                onClick={() => onDecreaseQuantity(item)}
+              >
+                -
+              </Button>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                className="ms-1"
+                onClick={() => onIncreaseQuantity(item)}
+              >
+                +
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                className="ms-2"
+                onClick={() => onRemoveFromCart(item)}
+              >
+                X
+              </Button>
+            </div>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+      <ListGroup.Item className="d-flex justify-content-between align-items-center bg-light">
+        <strong>Total del Carrito</strong>
+        <strong>${totalCartValue.toFixed(2)}</strong>
+      </ListGroup.Item>
     </div>
   );
 };

@@ -65,11 +65,6 @@ export const createOrder = async (req, res) => {
     let connection;
     try {
         const { id_usuario, id_metodo_pago, direccion_envio, detalles_pedido } = req.body;
-
-        if (!id_usuario || !id_metodo_pago || !direccion_envio || !detalles_pedido || detalles_pedido.length === 0) {
-            return res.status(400).json({ message: 'Faltan campos obligatorios o detalles del pedido.' });
-        }
-
         // Para transacciones, obtenemos una conexión del pool
         connection = await pool.getConnection();
         await connection.beginTransaction();
@@ -158,6 +153,78 @@ export const deleteOrder = async (req, res) => {
         if (connection) await connection.rollback();
         console.error('Error al eliminar pedido:', error);
         res.status(500).json({ message: 'Error interno del servidor.' });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
+export const getUserActiveCartOrCreate = async (req, res) => {
+    const { userId } = req.params; // Para usuario logueado
+    // ... (resto de la lógica para buscar/crear el carrito) ...
+
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        let pedidoId;
+        // Lógica para encontrar o crear un pedido de estado 'carrito'
+        if (userId && userId !== 'guest') { // Si es un usuario logueado
+            const [existingCart] = await connection.query(
+                `SELECT id_pedido FROM pedido WHERE id_usuario = ? AND estado_pedido = 'carrito';`,
+                [userId]
+            );
+            if (existingCart.length > 0) {
+                pedidoId = existingCart[0].id_pedido;
+            } else {
+                const [newCartResult] = await connection.query(
+                    `INSERT INTO pedido (id_usuario, fecha_pedido, estado_pedido, total_pedido) VALUES (?, NOW(), 'carrito', 0);`,
+                    [userId]
+                );
+                pedidoId = newCartResult.insertId;
+            }
+        } else { // Para usuario invitado (guest)
+            const [newCartResult] = await connection.query(
+                `INSERT INTO pedido (fecha_pedido, estado_pedido, total_pedido) VALUES (NOW(), 'carrito', 0);`
+            );
+            pedidoId = newCartResult.insertId;
+        }
+
+        // Obtener los ítems de ese carrito
+        const [itemsResult] = await connection.query(`
+            SELECT
+                dp.id_detalle_pedido,
+                dp.id_producto,
+                p.nombre_producto AS product_name,
+                p.imagen_url AS product_image,
+                dp.cantidad,
+                dp.precio_unitario,
+                dp.sub_total
+            FROM
+                detalle_pedido AS dp
+            JOIN
+                producto AS p ON dp.id_producto = p.id_producto
+            WHERE dp.id_pedido = ?;
+        `, [pedidoId]);
+
+        await connection.commit();
+        res.status(200).json({
+            pedidoId: pedidoId,
+            cartItems: itemsResult.map(item => ({
+                id: item.id_producto,
+                name: item.product_name,
+                image: item.product_image,
+                quantity: item.cantidad,
+                price: parseFloat(item.precio_unitario),
+                subTotal: parseFloat(item.sub_total),
+                detalleId: item.id_detalle_pedido
+            }))
+        });
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error('Error al obtener/crear carrito activo:', error);
+        res.status(500).json({ message: 'Error interno del servidor al gestionar el carrito.' });
     } finally {
         if (connection) connection.release();
     }
