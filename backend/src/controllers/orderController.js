@@ -1,5 +1,12 @@
 import pool from '../config/db.js';
 
+
+
+const generateTrackingNumber = () => {
+    const min = 1_000_000_000; // Usando separadores para legibilidad (JS los ignora)
+    const max = 2_000_000_000;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 // --- OBTENER TODOS LOS PEDIDOS CON SUS DETALLES ---
 export const getAllOrders = async (req, res) => {
     try {
@@ -60,46 +67,100 @@ export const getOrderById = async (req, res) => {
     }
 };
 
-// --- CREAR UN NUEVO PEDIDO (CON TRANSACCIÓN) ---
+
 export const createOrder = async (req, res) => {
     let connection;
+
     try {
-        const { id_usuario, id_metodo_pago, direccion_envio, detalles_pedido } = req.body;
-        // Para transacciones, obtenemos una conexión del pool
+        const {
+            id_usuario,
+            direccion_envio,
+            total_pedido,
+            items
+        } = req.body;
+
+        // --- Logs de depuración ---
+        console.log('\n--- RECIBIENDO NUEVO PEDIDO EN BACKEND ---');
+        console.log('req.body completo recibido:', req.body);
+        console.log('Valor de "items" después de desestructurar:', items);
+        console.log('¿"items" es un Array?', Array.isArray(items));
+
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            console.error('Error: "items" no es un array válido o está vacío en el body de la petición.');
+            return res.status(400).json({ message: 'El pedido debe contener al menos un ítem y estar en formato correcto.' });
+        }
+        if (!direccion_envio) {
+            return res.status(400).json({ message: 'La dirección de envío es obligatoria.' });
+        }
+        if (!req.body.nombre_cliente || !req.body.email_cliente) {
+            return res.status(400).json({ message: 'Nombre y email del cliente son obligatorios para el pedido.' });
+        }
+
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        let total_pedido = 0;
-        // Validar stock y calcular total
-        for (const item of detalles_pedido) {
-            const [productRows] = await connection.query('SELECT stock, precio_minorista FROM producto WHERE id_producto = ? FOR UPDATE', [item.id_producto]);
-            if (productRows.length === 0) throw new Error(`Producto con ID ${item.id_producto} no encontrado.`);
-            if (productRows[0].stock < item.cantidad) throw new Error(`Stock insuficiente para el producto ID ${item.id_producto}.`);
-            
-            item.precio_unitario = parseFloat(item.precio_unitario || productRows[0].precio_minorista);
-            item.sub_total = item.cantidad * item.precio_unitario;
-            total_pedido += item.sub_total;
+        const numeroDeSeguimiento = generateTrackingNumber();
+        console.log('Número de seguimiento generado (aprox. 10 dígitos):', numeroDeSeguimiento);
+
+
+        const [orderResult] = await connection.query(
+            `INSERT INTO pedido (
+                id_usuario,
+                fecha_pedido,
+                estado_pedido,
+                total_pedido,
+                direccion_envio,
+                numero_de_seguimiento  -- Esta columna es int(100)
+            ) VALUES (?, NOW(), ?, ?, ?, ?);`,
+            [
+                id_usuario || null,
+                'pendiente',
+                total_pedido,
+                direccion_envio,
+                numeroDeSeguimiento 
+            ]
+        );
+        const id_pedido_creado = orderResult.insertId;
+
+        // 2. Insertar los detalles del pedido en la tabla `detalle_pedido`
+        for (const item of items) {
+            if (!item.id_producto || !item.cantidad || !item.precio_unitario) {
+                throw new Error(`Ítem de pedido inválido: faltan id_producto, cantidad o precio_unitario para el ítem ${JSON.stringify(item)}`);
+            }
+            if (item.cantidad <= 0 || item.precio_unitario < 0) {
+                 throw new Error(`Ítem de pedido inválido: cantidad o precio no válidos para el ítem ${JSON.stringify(item)}`);
+            }
+            const sub_total = item.cantidad * item.precio_unitario;
+
+            await connection.query(
+                `INSERT INTO detalle_pedido (
+                    id_pedido, id_producto, cantidad, precio_unitario, sub_total
+                ) VALUES (?, ?, ?, ?, ?);`,
+                [id_pedido_creado, item.id_producto, item.cantidad, item.precio_unitario, sub_total]
+            );
         }
 
-        // Insertar el pedido principal
-        const [pedidoResult] = await connection.query('INSERT INTO pedido (id_usuario, id_metodo_pago, direccion_envio, total_pedido, estado_pedido, fecha_pedido) VALUES (?, ?, ?, ?, ?, NOW())', [id_usuario, id_metodo_pago, direccion_envio, total_pedido, 'pendiente']);
-        const newPedidoId = pedidoResult.insertId;
-
-        // Insertar detalles y actualizar stock
-        for (const item of detalles_pedido) {
-            await connection.query('INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario, sub_total) VALUES (?, ?, ?, ?, ?)', [newPedidoId, item.id_producto, item.cantidad, item.precio_unitario, item.sub_total]);
-            await connection.query('UPDATE producto SET stock = stock - ? WHERE id_producto = ?', [item.cantidad, item.id_producto]);
-        }
-        
         await connection.commit();
-        res.status(201).json({ message: 'Pedido creado exitosamente.', id_pedido: newPedidoId });
+
+        res.status(201).json({
+            message: 'Pedido realizado con éxito.',
+            id_pedido: id_pedido_creado,
+            numero_de_seguimiento: numeroDeSeguimiento // También lo devuelves en la respuesta
+        });
 
     } catch (error) {
-        if (connection) await connection.rollback();
-        console.error('Error al crear pedido:', error);
-        res.status(500).json({ message: error.message || 'Error interno del servidor.' });
+        if (connection) {
+            await connection.rollback();
+        }
+        console.error('ERROR CRÍTICO al crear pedido (backend):', error);
+        if (error.code && error.sqlMessage) {
+            return res.status(400).json({ message: `Error de base de datos: ${error.code} - ${error.sqlMessage}` });
+        }
+        res.status(500).json({ message: 'Error interno del servidor al crear el pedido.' });
     } finally {
-        if (connection) connection.release(); // Liberar la conexión de vuelta al pool
+        if (connection) {
+            connection.release();
+        }
     }
 };
 
