@@ -1,8 +1,6 @@
-// src/controllers/cartController.js
 import pool from '../config/db.js';
 
-// --- OBTENER TODOS LOS ITEMS DEL CARRITO PARA UN ID_PEDIDO (CARRITO) ESPECÍFICO ---
-// GET /api/cart/:pedidoId
+
 export const getCartItems = async (req, res) => {
     try {
         const { pedidoId } = req.params;
@@ -30,8 +28,7 @@ export const getCartItems = async (req, res) => {
     }
 };
 
-// --- AÑADIR UN ITEM AL CARRITO / ACTUALIZAR CANTIDAD SI YA EXISTE ---
-// POST /api/cart
+
 export const addOrUpdateCartItem = async (req, res) => {
     try {
         const { id_pedido, id_producto, cantidad, id_metodo_pago } = req.body;

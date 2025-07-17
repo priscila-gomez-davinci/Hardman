@@ -27,11 +27,11 @@ const Register = () => {
 
     try {
       const res = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST', // Es una petición POST para el registro
+        method: 'POST', 
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form), // Envía los datos del formulario como JSON
+        body: JSON.stringify(form), 
       });
 
       if (!res.ok) {
@@ -52,7 +52,7 @@ const Register = () => {
         provincia: '',
       });
       setTimeout(() => {
-        navigate('/login'); // Redirigir al login después de un breve mensaje
+        navigate('/login'); 
       }, 2000);
 
     } catch (err) {
@@ -63,7 +63,7 @@ const Register = () => {
 
   return (
     <main className="main-content">
-      <div className="login-container"> {/* Puedes crear un estilo específico para registro si es necesario */}
+      <div className="login-container"> 
         <form className="formulario login-form" onSubmit={handleSubmit}>
           <h2 className="h2contact">Registro de Usuario</h2>
 

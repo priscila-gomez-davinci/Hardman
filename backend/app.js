@@ -10,6 +10,7 @@ import orderRoutes from './src/routes/orderRoutes.js';
 import authRoutes from './src/routes/authRoutes.js'; 
 import userRoutes from './src/routes/userRoutes.js'; 
 import cartRoutes from './src/routes/cartRoutes.js'; 
+import repairRequestRoutes from './src/routes/repairRequestRoutes.js'; // ¡Importa el nuevo router!
 
 
 
@@ -31,6 +32,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/auth', authRoutes); 
 app.use('/api/users', userRoutes); 
 app.use('/api/cart', cartRoutes);
+app.use('/api/repair-requests', repairRequestRoutes); // Monta el nuevo router
+
 
 
 

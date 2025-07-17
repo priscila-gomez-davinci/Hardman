@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Spinner, Alert, Table, Button, Modal, Form } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 
-const API_ORDERS_URL = 'http://localhost:3000/api/orders'; // Tu endpoint de pedidos
+const API_ORDERS_URL = 'http://localhost:3000/api/orders'; 
 
 const OrderManagementPage = () => {
-    const { user } = useAuth(); // Para verificar el rol admin
-    const [editingStatus, setEditingStatus] = useState(null); // <-- ¡VERIFICA QUE ESTA LÍNEA EXISTA!
+    const { user } = useAuth(); 
+    const [editingStatus, setEditingStatus] = useState(null); 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -16,29 +16,27 @@ const OrderManagementPage = () => {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [newStatus, setNewStatus] = useState('');
 
-    // Estados para la carga/error de operaciones individuales (ej. actualizar/eliminar)
     const [opLoading, setOpLoading] = useState(false);
     const [opError, setOpError] = useState(null);
 
-    // Función para obtener todos los pedidos (memoizada con useCallback)
     const fetchOrders = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch(API_ORDERS_URL); // GET a todos los pedidos
+            const res = await fetch(API_ORDERS_URL); 
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(`Error HTTP: ${res.status}. Mensaje: ${errorData.message || 'Error desconocido al cargar pedidos.'}`);
             }
             const data = await res.json();
-            setOrders(data.orders); // El backend devuelve { orders: [...] }
+            setOrders(data.orders); 
         } catch (err) {
             setError('Error al cargar pedidos: ' + err.message);
             console.error('Error fetching orders:', err);
         } finally {
             setLoading(false);
         }
-    }, []); // Dependencias vacías, solo se vuelve a crear si sus dependencias cambian (que no hay)
+    }, []); 
 
     // Función para actualizar el estado de un pedido
     const handleUpdateOrderStatus = async (orderId) => {
@@ -60,11 +58,11 @@ const OrderManagementPage = () => {
                 throw new Error(`Error al actualizar estado: ${res.status}. Mensaje: ${errorData.message || 'Error desconocido.'}`);
             }
             alert('Estado del pedido actualizado.');
-            setShowDetailsModal(false); // Cierra el modal
-            setSelectedOrder(null); // Limpia la orden seleccionada
-            setEditingStatus(null); // Limpia el estado de edición (si lo usaras para un input directo)
-            setNewStatus(''); // Reinicia el nuevo estado
-            await fetchOrders(); // Recarga los pedidos para ver el cambio
+            setShowDetailsModal(false); 
+            setSelectedOrder(null); 
+            setEditingStatus(null); 
+            setNewStatus(''); 
+            await fetchOrders(); 
         } catch (err) {
             setOpError('Error al actualizar estado: ' + err.message);
             console.error('Error updating order status:', err);
@@ -73,7 +71,6 @@ const OrderManagementPage = () => {
         }
     };
 
-    // Función para eliminar un pedido (con transacción en backend)
     const handleDeleteOrder = async (orderId) => {
         if (!window.confirm(`¿Estás seguro de que quieres eliminar el pedido #${orderId} y sus detalles?`)) {
             return;
@@ -90,7 +87,7 @@ const OrderManagementPage = () => {
                 throw new Error(`Error al eliminar pedido: ${res.status}. Mensaje: ${errorData.message || 'Error desconocido.'}`);
             }
             alert('Pedido eliminado exitosamente.');
-            await fetchOrders(); // Recarga los pedidos para ver el cambio
+            await fetchOrders(); 
         } catch (err) {
             setOpError('Error al eliminar pedido: ' + err.message);
             console.error('Error deleting order:', err);
@@ -106,7 +103,6 @@ const OrderManagementPage = () => {
     };
 
 
-    // Efecto para cargar los pedidos al montar el componente o si el usuario cambia
     useEffect(() => {
         if (user?.role === 'admin') { // Solo si el usuario es admin, intenta cargar
             fetchOrders();
@@ -117,13 +113,10 @@ const OrderManagementPage = () => {
             setError('Inicia sesión como administrador para ver esta página.');
             setLoading(false); // Deja de cargar
         }
-    }, [user, fetchOrders]); // Depende del objeto user y de la función fetchOrders (memoizada)
+    }, [user, fetchOrders]); 
 
-
-    // Renderizado condicional de carga y errores
     if (loading) return <Spinner animation="border" role="status" className="m-5"><span className="visually-hidden">Cargando pedidos...</span></Spinner>;
     if (error) return <Alert variant="danger" className="m-5">{error}</Alert>;
-    // Si no es admin y no hay un error específico, mostrar mensaje de acceso denegado
     if (!user || user.role !== 'admin') return <Alert variant="danger" className="m-5">Acceso denegado. Solo administradores pueden ver esta página.</Alert>;
 
     return (
@@ -151,14 +144,14 @@ const OrderManagementPage = () => {
                     </thead>
                     <tbody>
                         {orders.map(order => (
-                            <tr key={order.id}> {/* 'id' es el id_pedido normalizado */}
+                            <tr key={order.id}> 
                                 <td>{order.id}</td>
                                 <td>{new Date(order.date).toLocaleDateString()}</td>
                                 <td>{order.status}</td>
                                 <td>${order.total.toFixed(2)}</td>
                                 <td>
                                     {order.userId || 'Invitado'}
-                                    {order.userName && ` (${order.userName} ${order.userLastName || ''})`} {/* Manejar apellido opcional */}
+                                    {order.userName && ` (${order.userName} ${order.userLastName || ''})`} 
                                     {order.userEmail && ` - ${order.userEmail}`}
                                 </td>
                                 <td>{order.shippingAddress}</td>

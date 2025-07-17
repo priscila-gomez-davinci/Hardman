@@ -3,11 +3,11 @@ import { ListGroup, Button, Alert } from 'react-bootstrap';
 
 const Cart = ({
   cartItems = [],
-  onRemoveFromCart, // Recibe el ítem completo del carrito
-  onIncreaseQuantity, // Recibe el ítem completo del carrito
-  onDecreaseQuantity, // Recibe el ítem completo del carrito
+  onRemoveFromCart, 
+  onIncreaseQuantity, 
+  onDecreaseQuantity, 
   totalCartValue,
-  onClearCart // Recibe la función para vaciar
+  onClearCart 
 }) => {
   // console.log("Items en Cart.jsx:", cartItems); // Para depuración
 

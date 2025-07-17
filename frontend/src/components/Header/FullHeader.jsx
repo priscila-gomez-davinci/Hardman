@@ -34,7 +34,6 @@ function FullHeader({ totalItemsInCart }) {
             <Nav.Link as={Link} to="/productos">Productos</Nav.Link>
 
             <NavDropdown title="Servicios" id="basic-nav-dropdown">
-              <NavDropdown.Item as={Link} to="/building">Armado</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/fixing">Reparación</NavDropdown.Item>
             </NavDropdown>
 
@@ -52,7 +51,7 @@ function FullHeader({ totalItemsInCart }) {
                 <NavDropdown.Item as={Link} to="/users">Gestión de usuarios</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/administrarProductos">Gestión de productos</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/administrarPedidos">Gestión de carritos</NavDropdown.Item>
-
+                <NavDropdown.Item as={Link} to="/administrarReparaciones">Gestión de reparaciones</NavDropdown.Item>
               </NavDropdown>
             )}
 

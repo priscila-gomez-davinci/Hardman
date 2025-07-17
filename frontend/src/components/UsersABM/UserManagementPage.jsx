@@ -20,14 +20,14 @@ const fetchUsers = async () => {
   setLoading(true);
   setError(null);
   try {
-    const response = await fetch(API_URL); // API_URL = 'http://localhost:3000/api/users' (CORRECTO)
+    const response = await fetch(API_URL); 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(`HTTP error! status: ${response.status}. Mensaje: ${errorData.message || 'Error desconocido al cargar usuarios.'}`);
     }
     const data = await response.json(); // data ES: {"users":[{"id_usuario":1, ...}]}
 
-    const normalizedUsers = data.users.map(u => ({ // <-- data.users es CORRECTO
+    const normalizedUsers = data.users.map(u => ({ 
         id: u.id_usuario,
         name: u.nombre,
         lastName: u.apellido,
@@ -37,11 +37,11 @@ const fetchUsers = async () => {
         city: u.ciudad,
         province: u.provincia,
         registrationDate: u.fecha_registro,
-        isActive: u.usuario_activo === 1, // Convertir tinyint(4) a booleano
-        roleId: u.id_rol, // ID numérico del rol
-        roleName: u.role_name // Nombre del rol
+        isActive: u.usuario_activo === 1, 
+        roleId: u.id_rol, 
+        roleName: u.role_name 
     }));
-    setUsers(normalizedUsers); // <-- Aquí se setea el estado 'users'
+    setUsers(normalizedUsers); 
   } catch (err) {
     setError('Error al cargar usuarios: ' + err.message);
     console.error('Error fetching users:', err);
@@ -59,25 +59,22 @@ const handleSaveUser = async (userToSave) => {
     let url;
 
     console.log('--- INTENTANDO GUARDAR USUARIO ---');
-    console.log('userToSave (desde el formulario - camelCase):', userToSave); // Datos tal como vienen del formulario
+    console.log('userToSave (desde el formulario - camelCase):', userToSave); 
 
-    // Normalización de datos del frontend (camelCase) a backend (snake_case)
     const dataToSend = {
         nombre: userToSave.name,
         apellido: userToSave.lastName,
         email: userToSave.email,
-        password: userToSave.password || null, // Asegúrate de enviar null si está vacío, no undefined
+        password: userToSave.password || null,
         telefono: userToSave.phone || null,
         direccion: userToSave.address || null,
         ciudad: userToSave.city || null,
         provincia: userToSave.province || null,
-        usuario_activo: userToSave.isActive ? 1 : 0, // Booleano a 1/0
-        id_rol: userToSave.roleId // ID del rol
+        usuario_activo: userToSave.isActive ? 1 : 0, 
+        id_rol: userToSave.roleId 
     };
-    // NOTA: Si userToSave.password es "" (vacío), se convertirá a null.
-    // Tu backend ya tiene lógica para ignorar contraseñas null/undefined al actualizar.
 
-    console.log('dataToSend (mapeado para el backend - snake_case):', dataToSend); // ¡Lo que REALMENTE se enviará!
+    console.log('dataToSend (mapeado para el backend - snake_case):', dataToSend); 
 
     if (userToSave.id) { // Es una actualización (PUT)
       method = 'PUT';
@@ -94,23 +91,23 @@ const handleSaveUser = async (userToSave) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(dataToSend), // ¡Enviar los datos mapeados!
+      body: JSON.stringify(dataToSend), 
     });
 
     console.log('Respuesta de la API - response.ok:', response.ok, 'status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Error detallado desde el backend:', errorData); // Imprime el error del backend
+      console.error('Error detallado desde el backend:', errorData); 
       throw new Error(`HTTP error! status: ${response.status}. Mensaje: ${errorData.message || 'Error desconocido.'}`);
     }
-    await fetchUsers(); // Recargar usuarios después de guardar
+    await fetchUsers(); 
     setShowForm(false);
     setEditingUser(null);
     console.log('--- USUARIO GUARDADO EXITOSAMENTE (confirmado por frontend) ---');
   } catch (err) {
     setError('Error al guardar usuario: ' + err.message);
-    console.error('Error al guardar usuario (frontend catch):', err); // Mensaje del catch
+    console.error('Error al guardar usuario (frontend catch):', err); 
   } finally {
     setLoading(false);
   }

@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react'; // Asegúrate de importar useEffect
+import React, { useState, useEffect } from 'react'; 
 import { Container, Row, Col, ListGroup, Form, Button, Alert, Spinner } from 'react-bootstrap';
-import { useNavigate, useLocation } from 'react-router-dom'; // Importa useLocation
+import { useNavigate, useLocation } from 'react-router-dom'; 
 import { useAuth } from '../../context/AuthContext';
 
 // Define la URL base para las operaciones del carrito
-const API_CART_URL = 'http://localhost:3000/api/cart'; // Para obtener los ítems del carrito
+const API_CART_URL = 'http://localhost:3000/api/cart'; 
 
-const Checkout = () => { // Ya no recibe cartItems, totalCartValue, onClearCart como props
+const Checkout = () => { 
   const navigate = useNavigate();
   const location = useLocation(); // Hook para acceder al estado de la ruta
   const { user } = useAuth();
 
-  // --- NUEVOS ESTADOS LOCALES para el carrito en Checkout ---
-  const [cartItems, setCartItems] = useState([]); // Ahora se gestiona aquí
-  const [totalCartValue, setTotalCartValue] = useState(0); // Ahora se gestiona aquí
+  const [cartItems, setCartItems] = useState([]); 
+  const [totalCartValue, setTotalCartValue] = useState(0); 
 
   const [formData, setFormData] = useState({
     nombre: '', apellido: '', email: '', direccion: '', ciudad: '', codigoPostal: '', provincia: '',
@@ -22,10 +21,8 @@ const Checkout = () => { // Ya no recibe cartItems, totalCartValue, onClearCart 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Obtener el cartId del estado de la ruta
   const cartIdFromState = location.state?.cartId || null;
 
-  // --- useEffect para cargar los ítems del carrito ---
   useEffect(() => {
     const fetchCartItems = async () => {
       if (!cartIdFromState) {
@@ -43,19 +40,16 @@ const Checkout = () => { // Ya no recibe cartItems, totalCartValue, onClearCart 
         }
         const data = await res.json();
         
-        // Normalizar los ítems del carrito (snake_case a camelCase)
         const normalizedCartItems = data.cartItems.map(item => ({
-            id: item.id_producto, // El ID del producto
-            detalleId: item.id_detalle_pedido, // El ID del detalle para PUT/DELETE
+            id: item.id_producto,
+            detalleId: item.id_detalle_pedido, 
             name: item.product_name,
             image: item.product_image,
             quantity: item.cantidad,
             price: parseFloat(item.precio_unitario),
             subTotal: parseFloat(item.sub_total),
-            // Asegúrate de mapear otros campos si los necesitas, ej. id_metodo_pago
         }));
         setCartItems(normalizedCartItems);
-        // Calcular el total una vez que los ítems están cargados
         setTotalCartValue(normalizedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0));
 
       } catch (err) {
@@ -67,9 +61,8 @@ const Checkout = () => { // Ya no recibe cartItems, totalCartValue, onClearCart 
     };
 
     fetchCartItems();
-  }, [cartIdFromState, navigate]); // Depende de cartIdFromState y navigate
+  }, [cartIdFromState, navigate]);
 
-  // Rellenar formData automáticamente si el usuario está logueado
   useEffect(() => {
     if (user) {
       setFormData(prevData => ({
@@ -89,12 +82,8 @@ const Checkout = () => { // Ya no recibe cartItems, totalCartValue, onClearCart 
     setFormData({ ...formData, [name]: value });
   };
 
-  // Esta función onClearCart ahora debe comunicarse con ProductList
-  // para que ProductList también limpie su estado y el backend
-  // Alternativa: Checkout hace la llamada al backend para limpiar el carrito
+
   const onClearCartLocallyAndBackend = async () => {
-    // Si tienes un onClearCart pasado desde ProductList, ÚSALO
-    // Si no, Checkout hace la llamada DELETE a /api/cart/clear/:cartIdFromState
     if (cartIdFromState) {
         setLoading(true);
         setError(null);
@@ -106,8 +95,8 @@ const Checkout = () => { // Ya no recibe cartItems, totalCartValue, onClearCart 
                 const errorData = await response.json();
                 throw new Error(`Error al limpiar carrito: ${response.status}. Mensaje: ${errorData.message || 'Error desconocido.'}`);
             }
-            setCartItems([]); // Limpia el estado local
-            setTotalCartValue(0); // Reinicia el total
+            setCartItems([]);
+            setTotalCartValue(0); 
             console.log("Carrito limpiado desde Checkout.");
         } catch (err) {
             setError('Error al limpiar el carrito: ' + err.message);
@@ -116,8 +105,6 @@ const Checkout = () => { // Ya no recibe cartItems, totalCartValue, onClearCart 
             setLoading(false);
         }
     }
-    // Después de limpiar, quizás redirigir al home o productos
-    // navigate('/productos');
   };
 
 
@@ -142,19 +129,18 @@ const handleSubmit = async (e) => {
       codigo_postal: formData.codigoPostal,
       total_pedido: totalCartValue,
       
-      // Asegúrate que 'items' siempre sea un array. Incluso si cartItems está vacío, map devuelve [].
-      items: cartItems.map(item => ({ // Este .map siempre devuelve un array
+      items: cartItems.map(item => ({ 
         id_producto: item.id,
         cantidad: item.quantity,
         precio_unitario: item.price,
       })),
-      cart_id_from_frontend: cartIdFromState, // Pasar el cartId si el backend lo usa para referencia
+      cart_id_from_frontend: cartIdFromState, 
     };
 
     console.log('--- Checkout Frontend: Enviando Pedido ---');
-    console.log('orderData COMPLETO que se enviará al backend:', orderData); // <-- VERIFICA ESTO
-    console.log('orderData.items (el array de ítems):', orderData.items);     // <-- VERIFICA ESTO
-    console.log('¿orderData.items es un Array?', Array.isArray(orderData.items)); // <-- VERIFICA ESTO
+    console.log('orderData COMPLETO que se enviará al backend:', orderData); 
+    console.log('orderData.items (el array de ítems):', orderData.items);     
+    console.log('¿orderData.items es un Array?', Array.isArray(orderData.items)); 
 
 
     const API_ORDER_URL = 'http://localhost:3000/api/orders';
@@ -166,7 +152,7 @@ const handleSubmit = async (e) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Error detallado de la API (frontend):', errorData); // Imprime el error del backend
+      console.error('Error detallado de la API (frontend):', errorData); 
       throw new Error(`Error al procesar el pedido: HTTP ${response.status}. Mensaje: ${errorData.message || 'Error desconocido.'}`);
     }
 
@@ -189,11 +175,11 @@ const handleSubmit = async (e) => {
 };
 
   // Renderizado
-  if (loading && !cartItems.length && !error) { // Mostrar spinner solo si carga inicial y no hay error
+  if (loading && !cartItems.length && !error) {
     return <Spinner animation="border" role="status" className="m-5"><span className="visually-hidden">Cargando carrito...</span></Spinner>;
   }
 
-  if (error && !orderPlaced) { // Mostrar error si existe y no se ha colocado el pedido
+  if (error && !orderPlaced) { 
     return (
       <Container className="py-5 text-center">
         <Alert variant="danger">
@@ -206,7 +192,7 @@ const handleSubmit = async (e) => {
     );
   }
 
-  if (cartItems.length === 0 && !orderPlaced) { // Si el carrito está vacío después de cargar
+  if (cartItems.length === 0 && !orderPlaced) { 
     return (
       <Container className="py-5 text-center">
         <Alert variant="warning">

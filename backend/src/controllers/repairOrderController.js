@@ -1,4 +1,3 @@
-// backend/src/controllers/repairOrderController.js
 import pool from '../config/db.js';
 
 const baseQuery = `

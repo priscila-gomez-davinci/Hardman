@@ -3,19 +3,11 @@ import pool from '../config/db.js';
 
 
 const generateTrackingNumber = () => {
-    const min = 1_000_000_000; // Usando separadores para legibilidad (JS los ignora)
+    const min = 1_000_000_000; 
     const max = 2_000_000_000;
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-// --- OBTENER TODOS LOS PEDIDOS CON SUS DETALLES (CORREGIDO Y MEJORADO) ---
-// src/controllers/orderController.js (MODIFICADO)
-
-import pool from '../config/db.js';
-
-// ... (todas tus otras funciones: generateTrackingNumber, createOrder, getUserActiveCartOrCreate, getOrderById, updateOrderStatus, deleteOrder) ...
-
-// --- OBTENER TODOS LOS PEDIDOS CON SUS DETALLES (ORDENADOS POR ESTADO) ---
 export const getAllOrders = async (req, res) => {
     try {
         const [pedidos] = await pool.query(`
@@ -91,9 +83,7 @@ export const getAllOrders = async (req, res) => {
     }
 };
 
-// ... (resto de orderController.js) ...
 
-// --- OBTENER UN PEDIDO POR ID CON SUS DETALLES ---
 export const getOrderById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -141,7 +131,7 @@ export const createOrder = async (req, res) => {
         console.log('\n--- RECIBIENDO NUEVO PEDIDO EN BACKEND ---');
         console.log('req.body completo recibido:', req.body);
         console.log('Valor de "items" después de desestructurar:', items);
-        console.log('¿"items" es un Array?', Array.isArray(items));
+        console.log('¿"items" es un Array o que nepes es?', Array.isArray(items));
 
         if (!items || !Array.isArray(items) || items.length === 0) {
             console.error('Error: "items" no es un array válido o está vacío en el body de la petición.');
@@ -203,7 +193,7 @@ export const createOrder = async (req, res) => {
         res.status(201).json({
             message: 'Pedido realizado con éxito.',
             id_pedido: id_pedido_creado,
-            numero_de_seguimiento: numeroDeSeguimiento // También lo devuelves en la respuesta
+            numero_de_seguimiento: numeroDeSeguimiento 
         });
 
     } catch (error) {
@@ -278,8 +268,7 @@ export const deleteOrder = async (req, res) => {
 };
 
 export const getUserActiveCartOrCreate = async (req, res) => {
-    const { userId } = req.params; // Para usuario logueado
-    // ... (resto de la lógica para buscar/crear el carrito) ...
+    const { userId } = req.params; 
 
     let connection;
     try {
@@ -287,8 +276,7 @@ export const getUserActiveCartOrCreate = async (req, res) => {
         await connection.beginTransaction();
 
         let pedidoId;
-        // Lógica para encontrar o crear un pedido de estado 'carrito'
-        if (userId && userId !== 'guest') { // Si es un usuario logueado
+        if (userId && userId !== 'guest') { 
             const [existingCart] = await connection.query(
                 `SELECT id_pedido FROM pedido WHERE id_usuario = ? AND estado_pedido = 'carrito';`,
                 [userId]
@@ -302,7 +290,7 @@ export const getUserActiveCartOrCreate = async (req, res) => {
                 );
                 pedidoId = newCartResult.insertId;
             }
-        } else { // Para usuario invitado (guest)
+        } else { 
             const [newCartResult] = await connection.query(
                 `INSERT INTO pedido (fecha_pedido, estado_pedido, total_pedido) VALUES (NOW(), 'carrito', 0);`
             );

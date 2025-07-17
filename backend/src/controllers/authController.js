@@ -1,8 +1,6 @@
-
 import pool from '../config/db.js';
 import bcrypt from 'bcrypt'; 
 
-// Tiempo de "salting" para bcrypt. Un valor de 10 es un buen equilibrio entre seguridad y rendimiento.
 const saltRounds = 10;
 
 /**
@@ -10,14 +8,13 @@ const saltRounds = 10;
  * Ahora usa bcrypt para comparar la contraseña ingresada con el hash almacenado.
  */
 export const loginUser = async (req, res) => {
-    const { email, password } = req.query; // Tus datos de login vienen por query params
+    const { email, password } = req.query; 
 
     if (!email || !password) {
         return res.status(400).json({ message: 'Se requieren email y contraseña.' });
     }
 
     try {
-        // 1. Buscar al usuario por email. NO incluyas la contraseña en la búsqueda inicial.
         const [rows] = await pool.query(`
             SELECT
                 u.id_usuario,

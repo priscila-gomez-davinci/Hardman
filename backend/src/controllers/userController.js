@@ -1,6 +1,5 @@
-// src/controllers/userController.js
 import pool from '../config/db.js';
-import bcrypt from 'bcrypt'; // Necesario para hashear contraseñas si un admin crea/modifica una nueva
+import bcrypt from 'bcrypt'; 
 
 const saltRounds = 10;
 

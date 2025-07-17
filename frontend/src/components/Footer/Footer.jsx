@@ -53,7 +53,7 @@ function Footer() {
           </Col>
         </Row>
 
-        <hr className="bg-secondary my-4" /> {/* Línea horizontal con margen */}
+        <hr className="bg-secondary my-4" /> 
         <Row>
           <Col className="text-center text-secondary">
             <small>Diseñado por alguien que no sabe de diseño</small>

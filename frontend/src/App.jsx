@@ -18,6 +18,7 @@ import PrivateRoute from './routes/PrivateRoute';
 import PublicOnlyRoute from './routes/PublicOnlyRoute';
 import NotFound from './routes/NotFound.jsx';
 import OrderManagementPage from './components/Cart/OrderManagementPage'; 
+import RepairRequestManagementPage from './components/Services/RepairRequestManagementPage'; // ¡Importa el nuevo componente!
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -54,6 +55,14 @@ function App() {
                 <PrivateRoute>
                   <Checkout
                   />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/administrarReparaciones" 
+              element={
+                <PrivateRoute roles={['admin']}>
+                  <RepairRequestManagementPage />
                 </PrivateRoute>
               }
             />

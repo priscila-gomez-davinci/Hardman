@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '/src/contact.css'; // Asegúrate de que la ruta a tu CSS sea correcta
+import '/src/contact.css'; 
 
 function ContactForm() {
   const [formData, setFormData] = useState({
@@ -7,19 +7,13 @@ function ContactForm() {
     telefono: '',
     correo: '',
     mensaje: ''
-    // Puedes añadir 'asunto' aquí si lo vas a usar en el frontend,
-    // aunque en tu DER no es una columna directa en formulario_contacto,
-    // sí lo usamos para el email.
-    // asunto: ''
   });
 
-  // validation errors state
   const [errors, setErrors] = useState({});
-  const [submitMessage, setSubmitMessage] = useState(null); // Para mensajes de éxito o error del envío
-  const [isLoading, setIsLoading] = useState(false); // Para mostrar estado de carga
+  const [submitMessage, setSubmitMessage] = useState(null); 
+  const [isLoading, setIsLoading] = useState(false); 
 
-  // URL base de tu API (ajusta según donde esté corriendo tu backend)
-  const API_BASE_URL = 'http://localhost:3000'; // O la URL de tu dominio si ya está desplegado
+  const API_BASE_URL = 'http://localhost:3000';
 
   const validateForm = () => {
     const newErrors = {};

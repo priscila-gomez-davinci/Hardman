@@ -1,21 +1,17 @@
-// Cargar variables de entorno al principio
 require('dotenv').config();
 
 const express = require('express');
-const mysql = require('mysql2/promise'); // Usamos la versión con promesas para async/await
-const cors = require('cors'); // Para habilitar CORS
+const mysql = require('mysql2/promise'); 
+const cors = require('cors'); 
 
 const app = express();
-const port = process.env.PORT || 3000; // Puedes configurar el puerto en .env o usar 3000 por defecto
+const port = process.env.PORT || 3000; 
 
-// Middleware para habilitar CORS
-// Esto es importante si tu frontend está en un dominio diferente (ej. React en localhost:5173 y backend en localhost:3000)
 app.use(cors());
 
 // Middleware para parsear JSON en el cuerpo de las peticiones
 app.use(express.json());
 
-// --- Configuración de la Conexión a la Base de Datos ---
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -24,7 +20,6 @@ const dbConfig = {
     port: process.env.DB_PORT
 };
 
-// Función para obtener una conexión a la DB
 async function getConnection() {
     try {
         const connection = await mysql.createConnection(dbConfig);

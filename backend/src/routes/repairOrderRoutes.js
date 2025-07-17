@@ -9,7 +9,6 @@ import {
 
 const router = express.Router();
 
-// Definición de las rutas para pedidos de reparación
 router.get('/', getAllRepairOrders);
 router.get('/:id', getRepairOrderById);
 router.post('/', createRepairOrder);

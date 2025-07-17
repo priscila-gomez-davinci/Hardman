@@ -1,11 +1,8 @@
-// src/components/UsersABM/UserForm.jsx (Ejemplo de estructura)
 
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 
-// Podrías necesitar obtener los roles disponibles de la API
-// Si no los obtienes de la API, deberías definirlos aquí estáticamente para el <Form.Select>
-const MOCK_ROLES = [ // MOCK, idealmente se obtiene de la API
+const MOCK_ROLES = [ 
   { id: 1, name: 'admin' },
   { id: 2, name: 'tecnico' },
   { id: 3, name: 'cliente' },
@@ -17,30 +14,28 @@ function UserForm({ user, onSave, onCancel }) {
     name: '',
     lastName: '',
     email: '',
-    password: '', // Campo para la contraseña (solo en el formulario, no la vas a mostrar)
+    password: '', 
     phone: '',
     address: '',
     city: '',
     province: '',
-    isActive: true, // Por defecto activo
-    roleId: '', // Debe ser el ID numérico del rol
-    // roleName: '', // Si también quieres mostrar el nombre del rol en el formulario, aunque roleId es lo que envías al backend
+    isActive: true, 
+    roleId: '', 
   });
 
   useEffect(() => {
     if (user) {
-      // Mapear user (camelCase de fetchUsers) a formData
       setFormData({
         id: user.id || '',
         name: user.name || '',
         lastName: user.lastName || '',
         email: user.email || '',
-        password: '', // ¡IMPORTANTE! NUNCA pre-llenar la contraseña al editar
+        password: '', 
         phone: user.phone || '',
         address: user.address || '',
         city: user.city || '',
         province: user.province || '',
-        isActive: user.isActive || false, // Asegura que sea booleano
+        isActive: user.isActive || false, 
         roleId: user.roleId || '',
       });
     } else {

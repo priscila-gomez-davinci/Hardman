@@ -54,14 +54,13 @@ export const createProduct = async (req, res) => {
 // --- ACTUALIZAR UN PRODUCTO ---
 export const updateProduct = async (req, res) => {
     try {
-        const { id } = req.params; // ID desde la URL
+        const { id } = req.params; 
         const { nombre_producto, descripcion, precio_minorista, precio_mayorista, stock, imagen_url, sku, activo, id_categoria } = req.body; // Datos del cuerpo de la petición
 
         console.log('--- INTENTANDO ACTUALIZAR PRODUCTO EN BACKEND ---');
         console.log('ID recibido en params:', id);
-        console.log('Body recibido (req.body):', req.body); // Ver todo el body recibido
+        console.log('Body recibido (req.body):', req.body); 
 
-        // Parámetros para la consulta SQL (antes de ejecutarla)
         const queryParams = [
             nombre_producto,
             descripcion || null,
@@ -70,15 +69,15 @@ export const updateProduct = async (req, res) => {
             stock,
             imagen_url || null,
             sku,
-            activo !== undefined ? activo : 1, // Si activo es undefined, por defecto 1
+            activo !== undefined ? activo : 1, 
             id_categoria,
-            id // El ID para la cláusula WHERE
+            id 
         ];
         console.log('Parámetros para la consulta SQL:', queryParams);
 
         const [result] = await pool.query(
             'UPDATE producto SET nombre_producto = ?, descripcion = ?, precio_minorista = ?, precio_mayorista = ?, stock = ?, imagen_url = ?, sku = ?, activo = ?, id_categoria = ? WHERE id_producto = ?',
-            queryParams // Usa los parámetros definidos
+            queryParams 
         );
 
         console.log('Resultado de la operación UPDATE en DB:', result);
@@ -91,14 +90,11 @@ export const updateProduct = async (req, res) => {
         console.log('--- PRODUCTO ACTUALIZADO EXITOSAMENTE EN BACKEND ---');
 
     } catch (error) {
-        console.error('ERROR CRÍTICO en updateProduct (backend):', error); // Aquí verás el error detallado de la DB
+        console.error('ERROR CRÍTICO en updateProduct (backend):', error); 
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({ message: 'El SKU ya está en uso por otro producto.' });
         }
-        // Este else-if es importante para capturar otros errores de DB que no sean ER_DUP_ENTRY
-        // Por ejemplo, ER_BAD_NULL_ERROR si intentas poner NULL en un campo NOT NULL
-        // o ER_NO_REFERENCED_ROW_2 si id_categoria no existe
-        else if (error.code) { // Si es un error de MySQL con un código específico
+        else if (error.code) { 
              return res.status(400).json({ message: `Error de base de datos: ${error.code} - ${error.sqlMessage || error.message}` });
         }
         res.status(500).json({ message: 'Error interno del servidor.' });
