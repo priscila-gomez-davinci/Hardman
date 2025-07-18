@@ -257,14 +257,12 @@ const ProductList = () => {
           <h2>Productos Disponibles</h2>
           <Row>
             {products.map((product) => (
-              <Col md={4} key={product.id}>
                 <ProductCardService
                   product={product}
                   onAddToCart={handleAddToCart}
                   onEdit={handleEditProduct}
                   onDelete={handleDeleteProduct}
                 />
-              </Col>
             ))}
           </Row>
         </Col>
