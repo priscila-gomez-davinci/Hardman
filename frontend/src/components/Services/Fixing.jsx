@@ -107,19 +107,19 @@ function FixingForm() {
       <div className="contenedor-campos">
         <div className="campo">
           <label htmlFor="nombre">Nombre</label>
-          <input type="text" id="nombre" name="nombre" placeholder="Tu Nombre" value={formData.nombre} onChange={handleChange} />
+          <input className="input-text" type="text" id="nombre" name="nombre" placeholder="Tu Nombre" value={formData.nombre} onChange={handleChange} />
           {errors.nombre && <p className="error">{errors.nombre}</p>}
         </div>
 
         <div className="campo">
           <label htmlFor="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="tu@email.com" value={formData.email} onChange={handleChange} required={!user} /> {/* Requerido si no hay user logueado */}
+          <input className="input-text" type="email" id="email" name="email" placeholder="tu@email.com" value={formData.email} onChange={handleChange} required={!user} /> {/* Requerido si no hay user logueado */}
           {errors.email && <p className="error">{errors.email}</p>}
         </div>
 
         <div className="campo">
           <label htmlFor="telefono">Teléfono</label>
-          <input type="tel" id="telefono" name="telefono" placeholder="Tu Número de Celular" value={formData.telefono} onChange={handleChange} />
+          <input className="input-text" type="tel" id="telefono" name="telefono" placeholder="Tu Número de Celular" value={formData.telefono} onChange={handleChange} />
           {errors.telefono && <p className="error">{errors.telefono}</p>}
         </div>
 
